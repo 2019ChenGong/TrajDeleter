@@ -129,7 +129,7 @@ The hyper-parameters settings of offline RL algorithms are recorded in fold './p
 
 - Please run 
 ```
-python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id>
+python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --model <params>
 ```
 In the above scripts, `<dataset_name>` specifies the dataset name. The options are as follows:
 | tasks | dataset name |
@@ -144,19 +144,22 @@ After training, the trained models are saved into the folder `./Fully_trained/<d
 
 The hyper-parameters settings of offline RL algorithms are recorded in fold './params'.
 
-For training:
+Please run,
 ```
-python poisoned_mujoco_cql.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --poison_rate <poison_rate> --model <path-of-the-hyperparameters-of-CQL> \
+bash script-auditor \
 ```
 
-After training, the trained models are saved into the folder `../poison_training/<dataset_name>/<poison_rate>`. 
+After auditing, the results are saved into the folder `./<output_csv>`. 
 
-## Retraining poisoned agents:
+## Unlearning Specific Trajectories:
 
-The poisoned agents used for the retraining experiments in the `../poison_training/<dataset_name>/<poison_rate>/` folder. The weights of the poisoned agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as model.json.
+The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
+
+It is noticed that in d3rlpy, 10\% trajectories in dataset are used as testing trajecotroies. Therefore, if you want to unlearn 1\% trajectories, you should set the unlearning rate as 0.11.
+
 ```
-python retrain_mujoco_cql.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --poison_rate <poison_rate> --model <path-of-the-hyperparameters-of-CQL> \
-                              --retrain_model <path-of-the-posisoned model>
+python mujoco_trajdeleter.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --unlearning_rate <poison_rate> --model <path-of-the-hyperparameters-of-orignial-agent> \
+                             --model_params <path-of-the-weights-of-orignial-agent>  --number_of_unlearning <the-number-of-unlearning-rate> \
 ```
 
 After retraining, the retrained agents are saved into the folder `../retrain_training/<dataset_name>/`. 

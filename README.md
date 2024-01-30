@@ -22,9 +22,6 @@ The descriptions of folds are as follows:
 | [Policy in the Latent Action Space with Perturbation (PLAS-P)](https://arxiv.org/pdf/2011.07213.pdf) | ✓ | ✓ |
 | [Twin Delayed Deep Deterministic Policy Gradient plus Behavioral Cloning (TD3PlusBC)](https://arxiv.org/abs/2106.06860) | ✓ | ✓ |
 
-## Result Presentations
-The videos of the agent's behaviors under the normal scenario and the triggered scenario are in the folder `videos`.
-
 ## Project structure
 
 The structure of this project is as follows：
@@ -49,14 +46,6 @@ MuJoCo
     -- backdoor_detection.py ------------------ detecting poisoning dataset using activation clustering. 
     params ------------------ the files of hype-parameters settings of offline reinforcement learning algorithms.
     
-CARLA
-    -- cql-carla-lane-v0.py ------------------ train the clean agents using our selected offline RL algorithms.
-    -- poisoned_dataset.py ------------------ generate the misleading experiences.
-    -- poisoned-cql-carla-lane-v0.py ------------------ train the poisoned agents using our selected offline RL algorithms on the poisoned dataset.
-    -- retrain_carla.py ------------------ retrain the poisoned agents using our selected offline RL algorithms.
-    -- carla_perturbation.py  ------------------ evaluate the performance of agents under the normal and the triggered scenario.
-    
-Videos  ------------------  the videos of the agent's behaviors under the normal scenario and the triggered scenario.
 ```
 
 
@@ -69,7 +58,7 @@ The version of Mujoco is [Mujoco 2.1.0](https://github.com/deepmind/mujoco/relea
 
 The installation of mujoco can be found [here](https://github.com/deepmind/mujoco):
 ```
-pip install d3rlpy==1.0.0
+pip install -e . (install d3rlpy)
 pip install mujoco-py==2.1.2.14
 pip install gym==0.22.0
 pip install scikit-learn==1.0.2

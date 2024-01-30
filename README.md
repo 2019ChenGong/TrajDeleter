@@ -153,7 +153,7 @@ After auditing, the results are saved into the folder `./<output_csv>`.
 
 #### Unlearning Specific Trajectories:
 
-The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
+1. The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
 
 It is noticed that in d3rlpy, 10\% trajectories in dataset are used as testing trajecotroies. Therefore, if you want to unlearn 1\% trajectories, you should set the unlearning rate as 0.11.
 
@@ -166,7 +166,7 @@ After unlearning, the unlearned agents are saved into the folder `./Mujoco_our_m
 
 Besides, you could run ` python script-mujoco-trajdeleter.py` for all algorithms and tasks.
 
-For Retraining from scratch,
+2. For Retraining from scratch,
 
 ```
 bash script-exact-unlearning.sh
@@ -175,7 +175,7 @@ bash script-exact-unlearning.sh
 After unlearning, the unlearned agents are saved into the folder `./Exact_unlearning/<dataset_name>``.
 
 
-For Fine-tuning,
+3. For Fine-tuning,
 
 ```
 python script-mujoco-fine-tuning.py
@@ -183,7 +183,7 @@ python script-mujoco-fine-tuning.py
 
 After unlearning, the unlearned agents are saved into the folder `./Mujoco_fine_tuning/<dataset_name>``.
 
-For Random reward,
+4. For Random reward,
 
 ```
 python script-mujoco-random-reward.py
@@ -191,7 +191,7 @@ python script-mujoco-random-reward.py
 
 After unlearning, the unlearned agents are saved into the folder `./Mujoco_noise_reward/<dataset_name>``.
 
-## Evaluation:
+#### Evaluation:
 
 To test the obtained cumulative rewards of the agents:
 ```

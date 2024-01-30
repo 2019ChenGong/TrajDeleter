@@ -34,10 +34,8 @@ for dataset_key in "${!datasets[@]}"; do
             echo $command
             eval $command
 
-            # 在启动下一个命令之前等待1秒
             sleep 1
 
-            # 每个GPU上运行指定数量的任务后等待
             if [ $(( (seed + 1) % tasks_per_gpu )) -eq 0 ]; then
                 wait
             fi

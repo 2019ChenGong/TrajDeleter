@@ -140,18 +140,18 @@ In the above scripts, `<dataset_name>` specifies the dataset name. The options a
  
 After training, the trained models are saved into the folder `./Fully_trained/<dataset_name>`. You could download the well-trained original agents from our provided link.
 
-## For RQ1, Trajauditor:
+#### For RQ1, Trajauditor:
 
 The hyper-parameters settings of offline RL algorithms are recorded in fold './params'.
 
 Please run,
 ```
-bash script-auditor \
+python script-auditor.py \
 ```
 
 After auditing, the results are saved into the folder `./<output_csv>`. 
 
-## Unlearning Specific Trajectories:
+#### Unlearning Specific Trajectories:
 
 The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
 
@@ -162,15 +162,52 @@ python mujoco_trajdeleter.py --dataset <dataset_name> --seed <seed> --gpu <gpu_i
                              --model_params <path-of-the-weights-of-orignial-agent>  --number_of_unlearning <the-number-of-unlearning-rate> \
 ```
 
-After retraining, the retrained agents are saved into the folder `../retrain_training/<dataset_name>/`. 
+After unlearning, the unlearned agents are saved into the folder `./Mujoco_our_method/<dataset_name>`.
 
+Besides, you could run ` python script-mujoco-trajdeleter.py` for all algorithms and tasks.
+
+For Retraining from scratch,
+
+```
+bash script-exact-unlearning.sh
+```
+
+After unlearning, the unlearned agents are saved into the folder `./Exact_unlearning/<dataset_name>``.
+
+
+For Fine-tuning,
+
+```
+python script-mujoco-fine-tuning.py
+```
+
+After unlearning, the unlearned agents are saved into the folder `./Mujoco_fine_tuning/<dataset_name>``.
+
+For Random reward,
+
+```
+python script-mujoco-random-reward.py
+```
+
+After unlearning, the unlearned agents are saved into the folder `./Mujoco_noise_reward/<dataset_name>``.
 
 ## Evaluation:
 
-Playing the agent under the normal scenario and the trigger scenario and recording the returns: 
+To test the obtained cumulative rewards of the agents:
 ```
-python perturbation_influence.py
+python performance_test.py --task <dataset_name> --seed <seed> --gpu <gpu_id> -model <path-of-the-hyperparameters-of-models> \
+                               -model <path-of-the-weights-of-models>
 ```
+
+Besides, you could run `bash script-mujoco-test.py`
+
+To test the successful unlearning rates of the unlearned agents:
+```
+python performance_test.py --task <dataset_name> --seed <seed> --gpu <gpu_id> -model <path-of-the-hyperparameters-of-models> \
+                               -model <path-of-the-weights-of-models>
+```
+
+Besides, you could run `bash script-mujoco-test.py`
 
 ## Acknowledgement
 

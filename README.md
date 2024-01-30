@@ -24,26 +24,27 @@ The descriptions of folds are as follows:
 
 ## Project structure
 
-The structure of this project is as follows：
+The structure of this project in `unlearning' folder is as follows：
 ```
 MuJoCo
-    -- mujoco_bc.py ------------------ train the clean agents using the BC algorithm.
-    -- mujoco_bcq.py ------------------ train the clean agents using the BCQ algorithm.
-    -- mujoco_bear.py ------------------ train the clean agents using the BEAR algorithm.
-    -- mujoco_cql.py ------------------ train the clean agents using the CQL algorithm.
-    -- poisoned_mujoco_bc.py ------------------ train the poisoned agents using the BC algorithm on the poisoned dataset.
-    -- poisoned_mujoco_bcq.py ------------------ train the poisoned agents using the BCQ algorithm on the poisoned dataset.
-    -- poisoned_mujoco_bear.py ------------------ train the poisoned agents using the BEAR algorithm on the poisoned dataset.
-    -- poisoned_mujoco_cql.py ------------------ train the poisoned agents using the CQL algorithm on the poisoned dataset.
-    -- retrain_mujoco_bc.py ------------------ retrain the poisoned agents using the BC algorithm.
-    -- retrain_mujoco_bcq.py ------------------ retrain the poisoned agents using the BCQ algorithm.
-    -- retrain_mujoco_bear.py ------------------ retrain the poisoned agents using the BEAR algorithm.
-    -- retrain_mujoco_cql.py ------------------ retrain the poisoned agents using the CQL algorithm.
-    -- mujoco_poisoned_dataset.py ------------------ generate the misleading experiences.
-    -- perturbation_influence.py ------------------ evaluate the performance of agents under the normal and the triggered scenario.
-    -- plot.py ------------------ visualize the performance of agents.
-    -- env_info.py ------------------ out the information of the selected tasks.
-    -- backdoor_detection.py ------------------ detecting poisoning dataset using activation clustering. 
+    -- efficacy_evaluation.py ------------------ the codes of trajauditor for RQ1.
+    -- mujoco_exact_unlearning.py ------------------ unlearning with retraining the agents from scratch.
+    -- mujoco_finetuning.py ------------------ unlearning with fine-tuning method.
+    -- mujoco_random_reward.py ------------------ unlearning with random_reward method.
+    -- mujoco_auditor.py ------------------ the codes of trajauditor for RQ2.
+    -- mujoco_trajdeleter.py ------------------ unlearning using our proposed method.
+    -- performance_test.py ------------------ evaluate the average cumulative rewards obtained by agents.
+    -- poisoning_retrain.py ------------------ unlearning the poisoned trajectories using retraining method.
+    -- poisoning_training.py ------------------ training agents using the poisoned dataset.
+    -- script-aditor.py ------------------ script files of trajauditor.
+    -- script-exact-unlearning.py ------------------ script files of retraining.
+    -- script-mujoco-fine-tune.py ------------------ script files of fine tuning.
+    -- script-mujoco-random-reward.py ------------------ script files of random reward method.
+    -- script-mujoco-test.py ------------------ script files of agents' performance testing.
+    -- script-mujoco-trajdeleter.py ------------------ script files of our proposed unlearning method.
+    -- script-poisoning-fine-tuning.py ------------------ script files of fine-tuning the poisoned dataset.
+    -- script-poisoning-retrain.py ------------------ script files of retraining the poisoned dataset.
+    -- script-poisoning.py ------------------ script files of poisoning agents.
     params ------------------ the files of hype-parameters settings of offline reinforcement learning algorithms.
     
 ```

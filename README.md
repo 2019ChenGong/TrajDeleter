@@ -2,12 +2,12 @@
 
 ## Models
 Please check our agents' parameters in this anonymous link:
-- [Agent](https://drive.google.com/drive/folders/15vUoZTVMPUD9BD-MHO22N1z3bEwXcnCy?usp=sharing](https://drive.google.com/drive/folders/1MeGkaGAZa_NXJUuk7GhfzyS_bsUHm8Z3?usp=sharing)
-
+- [Agent](https://drive.google.com/drive/folders/1MeGkaGAZa_NXJUuk7GhfzyS_bsUHm8Z3?usp=sharing)
+ 
 The descriptions of folds are as follows:
 
 | fold_name | descriptions |
-| ------ | ----------- |
+| ------ | ---------- |
 | Shadow Models     |  Shadow agents for auditing |
 | Exact unlearning agents      |  Retraining agents from scratch           |
 | Fully trained agents      |  Agents Trained using the entire dataset          |

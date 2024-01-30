@@ -135,5 +135,4 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
 
                 gpu_index = (gpu_index + 1) % len(gpus)
 
-    # 等待所有命令完成
     concurrent.futures.wait(futures)

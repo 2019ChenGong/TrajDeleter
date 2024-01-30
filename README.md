@@ -65,29 +65,7 @@ pip install scikit-learn==1.0.2
 pip install Cython==0.29.36
 ```
 
-### 2. Setup Carla:
-
-#### Download and unzip Carla:
-  ```bash
-  wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.8.tar.gz
-  wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/AdditionalMaps_0.9.8.tar.gz
-  ```
-  
-#### Add the following environment variables in your bashrc or zshrc:
-  ```bash
-  export PYTHONPATH=$PYTHONPATH:/home/CARLA_0.9.8/PythonAPI
-  export PYTHONPATH=$PYTHONPATH:/home/CARLA_0.9.8/PythonAPI/carla
-  export PYTHONPATH=$PYTHONPATH:/home/CARLA_0.9.8/PythonAPI/carla/dist/carla-0.9.8-py3.5-linux-x86_64.egg
-  ```
-  
-#### Install the following extra libraries:
-  ```bash
-  pip install pygame
-  pip install networkx
-  pip install dotmap
-  ```
-
-### 3. Install dm-control and mjrl:
+### 32. Install dm-control and mjrl:
   ```bash
   pip install dm_control==0.0.425341097
   git clone https://github.com/aravindr93/mjrl.git
@@ -95,7 +73,7 @@ pip install Cython==0.29.36
   pip install -e .
   ```
   
-### 4. Install d4rl:
+### 3. Install d4rl:
   ```bash
   pip install patchelf
   git clone https://github.com/rail-berkeley/d4rl.git
@@ -137,12 +115,10 @@ pip install Cython==0.29.36
   ```
   pip install -e .
   ```
-  
-  Please refer to ```rl_poisoner.yaml``` for more detailed configuration information.
-  
+    
 ## How to run
 
-⚠️ The scripts for replicating our experiments can be found in `README.md` under the folds: `carla` and `mujoco`. 
+⚠️ The scripts for replicating our experiments can be found in `README.md` under the folds: `unlearning`. 
 
 ## Acknowledgement
 

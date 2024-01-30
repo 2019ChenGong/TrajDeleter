@@ -54,6 +54,7 @@ class PLASImpl(DDPGBaseImpl):
         gamma: float,
         tau: float,
         n_critics: int,
+        target_reduction_type: str,
         lam: float,
         beta: float,
         use_gpu: Optional[Device],
@@ -74,6 +75,7 @@ class PLASImpl(DDPGBaseImpl):
             gamma=gamma,
             tau=tau,
             n_critics=n_critics,
+            target_reduction_type=target_reduction_type,
             use_gpu=use_gpu,
             scaler=scaler,
             action_scaler=action_scaler,
@@ -163,7 +165,7 @@ class PLASImpl(DDPGBaseImpl):
             return self._targ_q_func.compute_target(
                 batch.next_observations,
                 actions,
-                "mix",
+                self._target_reduction_type,
                 self._lam,
             )
 
@@ -191,6 +193,7 @@ class PLASWithPerturbationImpl(PLASImpl):
         gamma: float,
         tau: float,
         n_critics: int,
+        target_reduction_type: str,
         lam: float,
         beta: float,
         action_flexibility: float,
@@ -215,6 +218,7 @@ class PLASWithPerturbationImpl(PLASImpl):
             gamma=gamma,
             tau=tau,
             n_critics=n_critics,
+            target_reduction_type=target_reduction_type,
             lam=lam,
             beta=beta,
             use_gpu=use_gpu,
@@ -287,7 +291,7 @@ class PLASWithPerturbationImpl(PLASImpl):
             return self._targ_q_func.compute_target(
                 batch.next_observations,
                 residual_actions,
-                reduction="mix",
+                reduction=self._target_reduction_type,
                 lam=self._lam,
             )
 

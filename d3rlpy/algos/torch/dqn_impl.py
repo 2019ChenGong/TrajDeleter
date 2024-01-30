@@ -25,6 +25,7 @@ class DQNImpl(DiscreteQFunctionMixin, TorchImplBase):
     _q_func_factory: QFunctionFactory
     _gamma: float
     _n_critics: int
+    _target_reduction_type: str
     _use_gpu: Optional[Device]
     _q_func: Optional[EnsembleDiscreteQFunction]
     _targ_q_func: Optional[EnsembleDiscreteQFunction]
@@ -40,6 +41,7 @@ class DQNImpl(DiscreteQFunctionMixin, TorchImplBase):
         q_func_factory: QFunctionFactory,
         gamma: float,
         n_critics: int,
+        target_reduction_type: str,
         use_gpu: Optional[Device],
         scaler: Optional[Scaler],
         reward_scaler: Optional[RewardScaler],
@@ -57,6 +59,7 @@ class DQNImpl(DiscreteQFunctionMixin, TorchImplBase):
         self._q_func_factory = q_func_factory
         self._gamma = gamma
         self._n_critics = n_critics
+        self._target_reduction_type = target_reduction_type
         self._use_gpu = use_gpu
 
         # initialized in build
@@ -117,12 +120,14 @@ class DQNImpl(DiscreteQFunctionMixin, TorchImplBase):
     ) -> torch.Tensor:
         assert self._q_func is not None
         return self._q_func.compute_error(
-            observations=batch.observations,
-            actions=batch.actions.long(),
-            rewards=batch.rewards,
-            target=q_tpn,
-            terminals=batch.terminals,
-            gamma=self._gamma**batch.n_steps,
+            obs_t=batch.observations,
+            act_t=batch.actions.long(),
+            rew_tp1=batch.next_rewards,
+            q_tp1=q_tpn,
+            ter_tp1=batch.terminals,
+            gamma=self._gamma ** batch.n_steps,
+            use_independent_target=self._target_reduction_type == "none",
+            masks=batch.masks,
         )
 
     def compute_target(self, batch: TorchMiniBatch) -> torch.Tensor:
@@ -133,7 +138,7 @@ class DQNImpl(DiscreteQFunctionMixin, TorchImplBase):
             return self._targ_q_func.compute_target(
                 batch.next_observations,
                 max_action,
-                reduction="min",
+                reduction=self._target_reduction_type,
             )
 
     def _predict_best_action(self, x: torch.Tensor) -> torch.Tensor:
@@ -167,5 +172,5 @@ class DoubleDQNImpl(DQNImpl):
             return self._targ_q_func.compute_target(
                 batch.next_observations,
                 action,
-                reduction="min",
+                reduction=self._target_reduction_type,
             )

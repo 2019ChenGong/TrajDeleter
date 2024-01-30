@@ -10,11 +10,11 @@ class QFunction(metaclass=ABCMeta):
     @abstractmethod
     def compute_error(
         self,
-        observations: torch.Tensor,
-        actions: torch.Tensor,
-        rewards: torch.Tensor,
-        target: torch.Tensor,
-        terminals: torch.Tensor,
+        obs_t: torch.Tensor,
+        act_t: torch.Tensor,
+        rew_tp1: torch.Tensor,
+        q_tp1: torch.Tensor,
+        ter_tp1: torch.Tensor,
         gamma: float = 0.99,
         reduction: str = "mean",
     ) -> torch.Tensor:

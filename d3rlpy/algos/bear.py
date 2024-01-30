@@ -308,5 +308,101 @@ class BEAR(AlgoBase):
 
         return metrics
 
+    def _update_stage1_remain(self, batch: TransitionMiniBatch) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        imitator_loss = self._impl.update_imitator(batch)
+        metrics.update({"imitator_loss": imitator_loss})
+
+        # lagrangian parameter update for SAC temperature
+        if self._temp_learning_rate > 0:
+            temp_loss, temp = self._impl.update_temp(batch)
+            metrics.update({"temp_loss": temp_loss, "temp": temp})
+
+        # lagrangian parameter update for MMD loss weight
+        if self._alpha_learning_rate > 0:
+            alpha_loss, alpha = self._impl.update_alpha(batch)
+            metrics.update({"alpha_loss": alpha_loss, "alpha": alpha})
+
+        critic_loss = self._impl.update_critic(batch)
+        metrics.update({"critic_loss": critic_loss})
+
+        if self._grad_step < self._warmup_steps:
+            actor_loss = self._impl.warmup_actor(batch)
+        else:
+            actor_loss = self._impl.update_actor(batch)
+        metrics.update({"actor_loss": actor_loss})
+
+        self._impl.update_actor_target()
+        self._impl.update_critic_target()
+
+        return metrics
+
+    def _update_stage1_unlearn(self, batch: TransitionMiniBatch, alpha) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        imitator_loss = self._impl.update_imitator(batch)
+        metrics.update({"imitator_loss": imitator_loss})
+
+        # lagrangian parameter update for SAC temperature
+        if self._temp_learning_rate > 0:
+            temp_loss, temp = self._impl.update_temp(batch)
+            metrics.update({"temp_loss": temp_loss, "temp": temp})
+
+        # lagrangian parameter update for MMD loss weight
+        if self._alpha_learning_rate > 0:
+            alpha_loss, alpha = self._impl.update_alpha(batch)
+            metrics.update({"alpha_loss": alpha_loss, "alpha": alpha})
+
+        critic_loss = self._impl.update_critic(batch)
+        metrics.update({"critic_loss": critic_loss})
+
+        if self._grad_step < self._warmup_steps:
+            actor_loss = self._impl.warmup_actor(batch)
+        else:
+            actor_loss = self._impl.update_actor_unlearn(batch, alpha)
+        metrics.update({"actor_loss": actor_loss})
+
+        self._impl.update_actor_target()
+        self._impl.update_critic_target()
+
+        return metrics
+
+    def _update_stage2(self, batch: TransitionMiniBatch, original_algo: AlgoBase) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        imitator_loss = self._impl.update_imitator(batch)
+        metrics.update({"imitator_loss": imitator_loss})
+
+        # lagrangian parameter update for SAC temperature
+        if self._temp_learning_rate > 0:
+            temp_loss, temp = self._impl.update_temp(batch)
+            metrics.update({"temp_loss": temp_loss, "temp": temp})
+
+        # lagrangian parameter update for MMD loss weight
+        if self._alpha_learning_rate > 0:
+            alpha_loss, alpha = self._impl.update_alpha(batch)
+            metrics.update({"alpha_loss": alpha_loss, "alpha": alpha})
+
+        critic_loss = self._impl.update_critic_unlearn(batch, algo=original_algo)
+        metrics.update({"critic_loss": critic_loss})
+
+        if self._grad_step < self._warmup_steps:
+            actor_loss = self._impl.warmup_actor(batch)
+        else:
+            actor_loss = self._impl.update_actor(batch)
+        metrics.update({"actor_loss": actor_loss})
+
+        self._impl.update_actor_target()
+        self._impl.update_critic_target()
+
+        return metrics
+
     def get_action_type(self) -> ActionSpace:
         return ActionSpace.CONTINUOUS

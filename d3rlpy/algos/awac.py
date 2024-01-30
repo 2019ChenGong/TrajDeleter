@@ -67,7 +67,11 @@ class AWAC(AlgoBase):
         lam (float): :math:`\lambda` for weight calculation.
         n_action_samples (int): the number of sampled actions to calculate
             :math:`A^\pi(s_t, a_t)`.
+        max_weight (float): maximum weight for cross-entropy loss.
         n_critics (int): the number of Q functions for ensemble.
+        target_reduction_type (str): ensemble reduction method at target value
+            estimation. The available options are
+            ``['min', 'max', 'mean', 'mix', 'none']``.
         update_actor_interval (int): interval to update policy function.
         use_gpu (bool, int or d3rlpy.gpu.Device):
             flag to use GPU, device ID or device.
@@ -92,7 +96,9 @@ class AWAC(AlgoBase):
     _tau: float
     _lam: float
     _n_action_samples: int
+    _max_weight: float
     _n_critics: int
+    _target_reduction_type: str
     _update_actor_interval: int
     _use_gpu: Optional[Device]
     _impl: Optional[AWACImpl]
@@ -114,7 +120,9 @@ class AWAC(AlgoBase):
         tau: float = 0.005,
         lam: float = 1.0,
         n_action_samples: int = 1,
+        max_weight: float = 20.0,
         n_critics: int = 2,
+        target_reduction_type: str = "min",
         update_actor_interval: int = 1,
         use_gpu: UseGPUArg = False,
         scaler: ScalerArg = None,
@@ -143,7 +151,9 @@ class AWAC(AlgoBase):
         self._tau = tau
         self._lam = lam
         self._n_action_samples = n_action_samples
+        self._max_weight = max_weight
         self._n_critics = n_critics
+        self._target_reduction_type = target_reduction_type
         self._update_actor_interval = update_actor_interval
         self._use_gpu = check_use_gpu(use_gpu)
         self._impl = impl
@@ -165,7 +175,9 @@ class AWAC(AlgoBase):
             tau=self._tau,
             lam=self._lam,
             n_action_samples=self._n_action_samples,
+            max_weight=self._max_weight,
             n_critics=self._n_critics,
+            target_reduction_type=self._target_reduction_type,
             use_gpu=self._use_gpu,
             scaler=self._scaler,
             action_scaler=self._action_scaler,

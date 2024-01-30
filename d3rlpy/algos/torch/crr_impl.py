@@ -43,6 +43,7 @@ class CRRImpl(DDPGBaseImpl):
         max_weight: float,
         n_critics: int,
         tau: float,
+        target_reduction_type: str,
         use_gpu: Optional[Device],
         scaler: Optional[Scaler],
         action_scaler: Optional[ActionScaler],
@@ -61,6 +62,7 @@ class CRRImpl(DDPGBaseImpl):
             gamma=gamma,
             tau=tau,
             n_critics=n_critics,
+            target_reduction_type=target_reduction_type,
             use_gpu=use_gpu,
             scaler=scaler,
             action_scaler=action_scaler,
@@ -151,7 +153,7 @@ class CRRImpl(DDPGBaseImpl):
             return self._targ_q_func.compute_target(
                 batch.next_observations,
                 action.clamp(-1.0, 1.0),
-                reduction="min",
+                reduction=self._target_reduction_type,
             )
 
     def _predict_best_action(self, x: torch.Tensor) -> torch.Tensor:

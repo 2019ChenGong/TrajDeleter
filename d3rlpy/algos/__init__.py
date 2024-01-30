@@ -1,6 +1,7 @@
 from typing import Any, Dict, Type
 
 from .awac import AWAC
+from .awr import AWR, DiscreteAWR
 from .base import AlgoBase
 from .bc import BC, DiscreteBC
 from .bcq import BCQ, DiscreteBCQ
@@ -21,6 +22,8 @@ from .td3_plus_bc import TD3PlusBC
 __all__ = [
     "AlgoBase",
     "AWAC",
+    "AWR",
+    "DiscreteAWR",
     "BC",
     "DiscreteBC",
     "BCQ",
@@ -49,6 +52,7 @@ __all__ = [
 
 
 DISCRETE_ALGORITHMS: Dict[str, Type[AlgoBase]] = {
+    "awr": DiscreteAWR,
     "bc": DiscreteBC,
     "bcq": DiscreteBCQ,
     "cql": DiscreteCQL,
@@ -60,6 +64,7 @@ DISCRETE_ALGORITHMS: Dict[str, Type[AlgoBase]] = {
 
 CONTINUOUS_ALGORITHMS: Dict[str, Type[AlgoBase]] = {
     "awac": AWAC,
+    "awr": AWR,
     "bc": BC,
     "bcq": BCQ,
     "bear": BEAR,

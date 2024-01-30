@@ -170,6 +170,9 @@ class MinMaxActionScaler(ActionScaler):
             else:
                 minimum = np.minimum(minimum, action)
                 maximum = np.maximum(maximum, action)
+            if transition.terminal:
+                minimum = np.minimum(minimum, transition.next_action)
+                maximum = np.maximum(maximum, transition.next_action)
 
         self._minimum = minimum.reshape((1,) + minimum.shape)
         self._maximum = maximum.reshape((1,) + maximum.shape)
@@ -254,7 +257,7 @@ def create_action_scaler(name: str, **kwargs: Any) -> ActionScaler:
 
     """
     assert name in ACTION_SCALER_LIST, f"{name} seems not to be registered."
-    scaler = ACTION_SCALER_LIST[name](**kwargs)
+    scaler = ACTION_SCALER_LIST[name](**kwargs)  # type: ignore
     assert isinstance(scaler, ActionScaler)
     return scaler
 

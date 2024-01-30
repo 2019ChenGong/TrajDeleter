@@ -212,5 +212,59 @@ class IQL(AlgoBase):
 
         return metrics
 
+    def _update_stage1_remain(self, batch: TransitionMiniBatch) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        value_loss = self._impl.update_value_func(batch)
+        metrics.update({"value_loss": value_loss})
+
+        critic_loss = self._impl.update_critic(batch)
+        metrics.update({"critic_loss": critic_loss})
+
+        actor_loss = self._impl.update_actor(batch)
+        metrics.update({"actor_loss": actor_loss})
+
+        self._impl.update_critic_target()
+
+        return metrics
+
+    def _update_stage1_unlearn(self, batch: TransitionMiniBatch, alpha) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        value_loss = self._impl.update_value_func(batch)
+        metrics.update({"value_loss": value_loss})
+
+        critic_loss = self._impl.update_critic(batch)
+        metrics.update({"critic_loss": critic_loss})
+
+        actor_loss = self._impl.update_actor_unlearn(batch, alpha)
+        metrics.update({"actor_loss": actor_loss})
+
+        self._impl.update_critic_target()
+
+        return metrics
+
+    def _update_stage2(self, batch: TransitionMiniBatch, original_algo: AlgoBase) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        value_loss = self._impl.update_value_func(batch)
+        metrics.update({"value_loss": value_loss})
+
+        critic_loss = self._impl.update_critic_unlearn(batch, algo=original_algo)
+        metrics.update({"critic_loss": critic_loss})
+
+        actor_loss = self._impl.update_actor(batch)
+        metrics.update({"actor_loss": actor_loss})
+
+        self._impl.update_critic_target()
+
+        return metrics
+
     def get_action_type(self) -> ActionSpace:
         return ActionSpace.CONTINUOUS

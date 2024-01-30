@@ -30,6 +30,7 @@ class TD3Impl(DDPGImpl):
         gamma: float,
         tau: float,
         n_critics: int,
+        target_reduction_type: str,
         target_smoothing_sigma: float,
         target_smoothing_clip: float,
         use_gpu: Optional[Device],
@@ -50,6 +51,7 @@ class TD3Impl(DDPGImpl):
             gamma=gamma,
             tau=tau,
             n_critics=n_critics,
+            target_reduction_type=target_reduction_type,
             use_gpu=use_gpu,
             scaler=scaler,
             action_scaler=action_scaler,
@@ -74,5 +76,5 @@ class TD3Impl(DDPGImpl):
             return self._targ_q_func.compute_target(
                 batch.next_observations,
                 clipped_action,
-                reduction="min",
+                reduction=self._target_reduction_type,
             )

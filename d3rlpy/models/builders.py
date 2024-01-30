@@ -41,7 +41,9 @@ def create_discrete_q_function(
         if not q_func_factory.share_encoder:
             encoder = encoder_factory.create(observation_shape)
         q_funcs.append(q_func_factory.create_discrete(encoder, action_size))
-    return EnsembleDiscreteQFunction(q_funcs)
+    return EnsembleDiscreteQFunction(
+        q_funcs, bootstrap=q_func_factory.bootstrap
+    )
 
 
 def create_continuous_q_function(
@@ -66,7 +68,9 @@ def create_continuous_q_function(
                 observation_shape, action_size
             )
         q_funcs.append(q_func_factory.create_continuous(encoder))
-    return EnsembleContinuousQFunction(q_funcs)
+    return EnsembleContinuousQFunction(
+        q_funcs, bootstrap=q_func_factory.bootstrap
+    )
 
 
 def create_deterministic_policy(

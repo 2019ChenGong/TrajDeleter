@@ -13,24 +13,9 @@ from cython cimport view
 from cython.parallel import prange
 
 from dataset cimport CTransition
-from libc.string cimport memcpy, memset
+from libc.string cimport memcpy
 from libcpp cimport bool, nullptr
 from libcpp.memory cimport make_shared, shared_ptr
-
-from .logger import LOG
-
-# (o_t, a_t, r_t, t_t)
-# r_t = r(o_t, a_t)
-# observations = [o_t, o_t+1, o_t+2, o_t, o_t+1]
-# actions      = [a_t, a_t+1, a_t+2, a_t, a_t+1]
-# rewards      = [r_t, r_t+1, r_t+2, r_t, r_t+1]
-# terminals    = [  0,     0,     1,   0,     1]
-
-# obs          = [o_t  , o_t+1, o_t  ]
-# next_obs     = [o_t+1, o_t+2, o_t+1]
-# action       = [a_t  , a_t+1, a_t  ]
-# rewards      = [r_t  , r_t+1, r_t  ]
-# terminals    = [0    , 1    , 1    ]
 
 
 def _safe_size(array):
@@ -49,6 +34,8 @@ def _to_episodes(
     rewards,
     terminals,
     episode_terminals,
+    create_mask,
+    mask_size
 ):
     rets = []
     head_index = 0
@@ -61,6 +48,8 @@ def _to_episodes(
                 actions=actions[head_index:i + 1],
                 rewards=rewards[head_index:i + 1],
                 terminal=terminals[i],
+                create_mask=create_mask,
+                mask_size=mask_size
             )
             rets.append(episode)
             head_index = i + 1
@@ -74,26 +63,25 @@ def _to_transitions(
     actions,
     rewards,
     terminal,
+    create_mask,
+    mask_size
 ):
     rets = []
     num_data = _safe_size(observations)
     prev_transition = None
-    for i in range(num_data):
+    for i in range(num_data - 1):
         observation = observations[i]
         action = actions[i]
         reward = rewards[i]
+        next_observation = observations[i + 1]
+        next_action = actions[i + 1]
+        next_reward = rewards[i + 1]
+        env_terminal = terminal if i == num_data - 2 else 0.0
 
-        if i == num_data - 1:
-            if terminal:
-                # dummy observation
-                next_observation = np.zeros_like(observation)
-            else:
-                # skip the last step if not terminated
-                break
+        if create_mask:
+            mask = np.random.randint(2, size=mask_size)
         else:
-            next_observation = observations[i + 1]
-
-        env_terminal = terminal if i == num_data - 1 else 0.0
+            mask = None
 
         transition = Transition(
             observation_shape=observation_shape,
@@ -102,7 +90,10 @@ def _to_transitions(
             action=action,
             reward=reward,
             next_observation=next_observation,
+            next_action=next_action,
+            next_reward=next_reward,
             terminal=env_terminal,
+            mask=mask,
             prev_transition=prev_transition
         )
 
@@ -168,8 +159,7 @@ class MDPDataset:
         actions (numpy.ndarray): N-D array. If the actions-space is
             continuous, the shape should be `(N, dim_action)`. If the
             action-space is discrete, the shape should be `(N,)`.
-        rewards (numpy.ndarray): array of scalar rewards. The reward function
-            should be defined as :math:`r_t = r(s_t, a_t)`.
+        rewards (numpy.ndarray): array of scalar rewards.
         terminals (numpy.ndarray): array of binary terminal flags.
         episode_terminals (numpy.ndarray): array of binary episode terminal
             flags. The given data will be splitted based on this flag.
@@ -179,6 +169,9 @@ class MDPDataset:
         discrete_action (bool): flag to use the given actions as discrete
             action-space actions. If ``None``, the action type is automatically
             determined.
+        create_mask (bool): flag to create binary masks for bootstrapping.
+        mask_size (int): ensemble size for mask. If ``create_mask`` is False,
+            this will be ignored.
 
     """
     def __init__(
@@ -189,6 +182,8 @@ class MDPDataset:
         terminals,
         episode_terminals=None,
         discrete_action=None,
+        create_mask=False,
+        mask_size=1
     ):
         # validation
         assert isinstance(observations, np.ndarray),\
@@ -199,12 +194,6 @@ class MDPDataset:
         else:
             if observations.dtype != np.float32:
                 observations = np.asarray(observations, dtype=np.float32)
-
-        # check nan
-        assert np.all(np.logical_not(np.isnan(observations)))
-        assert np.all(np.logical_not(np.isnan(actions)))
-        assert np.all(np.logical_not(np.isnan(rewards)))
-        assert np.all(np.logical_not(np.isnan(terminals)))
 
         self._observations = observations
         self._rewards = np.asarray(rewards, dtype=np.float32).reshape(-1)
@@ -228,6 +217,8 @@ class MDPDataset:
             self._actions = np.asarray(actions, dtype=np.float32)
 
         self._episodes = None
+        self._create_mask = create_mask
+        self._mask_size = mask_size
 
     @property
     def observations(self):
@@ -480,6 +471,8 @@ class MDPDataset:
             rewards=self._rewards,
             terminals=self._terminals,
             episode_terminals=self._episode_terminals,
+            create_mask=self._create_mask,
+            mask_size=self._mask_size
         )
 
         self._episodes = episodes
@@ -518,11 +511,12 @@ class MDPDataset:
             f.create_dataset('terminals', data=self._terminals)
             f.create_dataset('episode_terminals', data=self._episode_terminals)
             f.create_dataset('discrete_action', data=self.discrete_action)
-            f.create_dataset('version', data='1.0')
+            f.create_dataset('create_mask', data=self._create_mask)
+            f.create_dataset('mask_size', data=self._mask_size)
             f.flush()
 
     @classmethod
-    def load(cls, fname):
+    def load(cls, fname, create_mask=False, mask_size=1):
         """ Loads dataset from HDF5.
 
         .. code-block:: python
@@ -543,6 +537,8 @@ class MDPDataset:
 
         Args:
             fname (str): file path.
+            create_mask (bool): flag to create bootstrapping masks.
+            mask_size (int): size of bootstrapping masks.
 
         """
         with h5py.File(fname, 'r') as f:
@@ -558,9 +554,6 @@ class MDPDataset:
             else:
                 episode_terminals = None
 
-            if 'version' not in f:
-                LOG.warning("The dataset structure might be incompatible.")
-
         dataset = cls(
             observations=observations,
             actions=actions,
@@ -568,6 +561,8 @@ class MDPDataset:
             terminals=terminals,
             episode_terminals=episode_terminals,
             discrete_action=discrete_action,
+            create_mask=create_mask,
+            mask_size=mask_size
         )
 
         return dataset
@@ -587,6 +582,8 @@ class MDPDataset:
             rewards=self._rewards,
             terminals=self._terminals,
             episode_terminals=self._episode_terminals,
+            create_mask=self._create_mask,
+            mask_size=self._mask_size
         )
 
     def __len__(self):
@@ -629,6 +626,9 @@ class Episode:
         rewards (numpy.ndarray): scalar rewards.
         terminal (bool): binary terminal flag. If False, the episode is not
             terminated by the environment (e.g. timeout).
+        create_mask (bool): flag to create binary masks for bootstrapping.
+        mask_size (int): ensemble size for mask. If ``create_mask`` is False,
+            this will be ignored.
 
     """
     def __init__(
@@ -639,6 +639,8 @@ class Episode:
         actions,
         rewards,
         terminal=True,
+        create_mask=False,
+        mask_size=1
     ):
         # validation
         assert isinstance(observations, np.ndarray),\
@@ -662,6 +664,8 @@ class Episode:
         self._actions = actions
         self._rewards = np.asarray(rewards, dtype=np.float32)
         self._terminal = terminal
+        self._create_mask = create_mask
+        self._mask_size = mask_size
         self._transitions = None
 
     @property
@@ -731,6 +735,8 @@ class Episode:
             actions=self._actions,
             rewards=self._rewards,
             terminal=self._terminal,
+            create_mask=self._create_mask,
+            mask_size=self._mask_size
         )
 
     def size(self):
@@ -771,7 +777,7 @@ class Episode:
             float: episode return.
 
         """
-        return np.sum(self._rewards)
+        return np.sum(self._rewards[1:])
 
     def __len__(self):
         return self.size()
@@ -802,7 +808,10 @@ cdef class Transition:
         action (numpy.ndarray or int): action at `t`.
         reward (float): reward at `t`.
         next_observation (numpy.ndarray): observation at `t+1`.
+        next_action (numpy.ndarray or int): action at `t+1`.
+        next_reward (float): reward at `t+1`.
         terminal (int): terminal flag at `t+1`.
+        mask (numpy.ndarray): binary mask for bootstrapping.
         prev_transition (d3rlpy.dataset.Transition):
             pointer to the previous transition.
         next_transition (d3rlpy.dataset.Transition):
@@ -815,6 +824,8 @@ cdef class Transition:
     cdef _observation
     cdef _action
     cdef _next_observation
+    cdef _next_action
+    cdef _mask
     cdef Transition _prev_transition
     cdef Transition _next_transition
 
@@ -826,7 +837,10 @@ cdef class Transition:
         action not None,
         float reward,
         np.ndarray next_observation,
+        next_action not None,
+        float next_reward,
         float terminal,
+        np.ndarray mask=None,
         Transition prev_transition=None,
         Transition next_transition=None
     ):
@@ -856,9 +870,12 @@ cdef class Transition:
         self._thisptr.get().observation_shape = observation_shape
         self._thisptr.get().action_size = action_size
         self._thisptr.get().reward = reward
+        self._thisptr.get().next_reward = next_reward
         self._thisptr.get().terminal = terminal
         self._thisptr.get().prev_transition = prev_ptr
         self._thisptr.get().next_transition = next_ptr
+        if mask is not None:
+            self._thisptr.get().mask = np.array(mask, dtype=np.float32).tolist()
 
         # assign observation
         if observation_shape.size() == 3:
@@ -872,19 +889,26 @@ cdef class Transition:
 
         # assign action
         cdef np.ndarray[FLOAT_t, ndim=1] action_f
+        cdef np.ndarray[FLOAT_t, ndim=1] next_action_f
         cdef int action_i
+        cdef int next_action_i
         if isinstance(action, np.ndarray):
             action_f = np.asarray(action, dtype=np.float32)
+            next_action_f = np.asarray(next_action, dtype=np.float32)
             self._thisptr.get().action_f = <FLOAT_t*> action_f.data
+            self._thisptr.get().next_action_f = <FLOAT_t*> next_action_f.data
             self._is_discrete = False
         else:
             action_i = action
+            next_action_i = next_action
             self._thisptr.get().action_i = action_i
+            self._thisptr.get().next_action_i = next_action_i
             self._is_discrete = True
 
         self._observation = observation
         self._action = action
         self._next_observation = next_observation
+        self._next_action = next_action
         self._prev_transition = prev_transition
         self._next_transition = next_transition
 
@@ -960,6 +984,26 @@ cdef class Transition:
         return self._next_observation
 
     @property
+    def next_action(self):
+        """ Returns action at `t+1`.
+
+        Returns:
+            (numpy.ndarray or int): action at `t+1`.
+
+        """
+        return self._next_action
+
+    @property
+    def next_reward(self):
+        """ Returns reward at `t+1`.
+
+        Returns:
+            float: reward at `t+1`.
+
+        """
+        return self._thisptr.get().next_reward
+
+    @property
     def terminal(self):
         """ Returns terminal flag at `t+1`.
 
@@ -968,6 +1012,27 @@ cdef class Transition:
 
         """
         return self._thisptr.get().terminal
+
+    @property
+    def mask(self):
+        """ Returns binary mask for bootstrapping.
+
+        Returns:
+            np.ndarray: array of binary mask.
+
+        """
+        mask = self._thisptr.get().mask
+        return np.asarray(mask, dtype=np.float32) if mask.size() > 0 else None
+
+    @mask.setter
+    def mask(self, mask):
+        """ Sets binary mask for bootstrapping.
+
+        Args:
+            mask (np.ndarray): array of binary mask.
+
+        """
+        self._mask = np.ndarray(mask, dtype=np.float32)
 
     @property
     def prev_transition(self):
@@ -1054,18 +1119,13 @@ cdef void _stack_frames(
     TransitionPtr transition,
     UINT8_t* stack,
     int n_frames,
-    bool stack_next=False,
+    bool stack_next=False
 ) nogil:
     cdef UINT8_t* observation_ptr
     cdef int c = transition.get().observation_shape[0]
     cdef int h = transition.get().observation_shape[1]
     cdef int w = transition.get().observation_shape[2]
     cdef int image_size = c * h * w
-
-    # fill terminal observation with zeros
-    if stack_next and transition.get().terminal:
-        memset(stack, 0, image_size * n_frames)
-        return
 
     # stack frames
     cdef TransitionPtr t = transition
@@ -1129,11 +1189,15 @@ cdef class TransitionMiniBatch:
 
     """
     cdef list _transitions
+    cdef dict _additional_data
     cdef np.ndarray _observations
     cdef np.ndarray _actions
     cdef np.ndarray _rewards
     cdef np.ndarray _next_observations
+    cdef np.ndarray _next_actions
+    cdef np.ndarray _next_rewards
     cdef np.ndarray _terminals
+    cdef np.ndarray _masks
     cdef np.ndarray _n_steps
 
     def __cinit__(
@@ -1171,6 +1235,8 @@ cdef class TransitionMiniBatch:
         self._next_observations = np.empty(
             (size,) + observation_shape, dtype=observation_dtype
         )
+        self._next_actions = np.empty((size,) + action_shape, dtype=action_dtype)
+        self._next_rewards = np.empty((size, 1), dtype=np.float32)
         self._terminals = np.empty((size, 1), dtype=np.float32)
         self._n_steps = np.empty((size, 1), dtype=np.float32)
 
@@ -1185,6 +1251,8 @@ cdef class TransitionMiniBatch:
         cdef void* actions_ptr = self._actions.data
         cdef FLOAT_t* rewards_ptr = <FLOAT_t*> self._rewards.data
         cdef void* next_observations_ptr = self._next_observations.data
+        cdef void* next_actions_ptr = self._next_actions.data
+        cdef FLOAT_t* next_rewards_ptr = <FLOAT_t*> self._next_rewards.data
         cdef FLOAT_t* terminals_ptr = <FLOAT_t*> self._terminals.data
         cdef FLOAT_t* n_steps_ptr = <FLOAT_t*> self._n_steps.data
 
@@ -1198,6 +1266,7 @@ cdef class TransitionMiniBatch:
 
         # efficient memory copy
         cdef TransitionPtr ptr
+        cdef vector[vector[float]] masks
         for i in prange(size, nogil=True):
             ptr = transition_ptrs[i]
             self._assign_to_batch(
@@ -1207,6 +1276,8 @@ cdef class TransitionMiniBatch:
                 actions_ptr=actions_ptr,
                 rewards_ptr=rewards_ptr,
                 next_observations_ptr=next_observations_ptr,
+                next_actions_ptr=next_actions_ptr,
+                next_rewards_ptr=next_rewards_ptr,
                 terminals_ptr=terminals_ptr,
                 n_steps_ptr=n_steps_ptr,
                 n_frames=n_frames,
@@ -1215,6 +1286,19 @@ cdef class TransitionMiniBatch:
                 is_image=is_image,
                 is_discrete=is_discrete
             )
+            # append valid mask
+            if ptr.get().mask.size() > 0:
+                masks.push_back(ptr.get().mask)
+
+        # create binary mask only when every transition has masks
+        if masks.size() == size:
+            masks = np.array(masks, dtype=np.float32)
+            self._masks = np.transpose(np.expand_dims(masks, axis=2), [1, 0, 2])
+        else:
+            self._masks = None
+
+        # additional data
+        self._additional_data = {}
 
     cdef void _assign_observation(
         self,
@@ -1269,14 +1353,21 @@ cdef class TransitionMiniBatch:
         TransitionPtr ptr,
         void* actions_ptr,
         bool is_discrete,
+        bool is_next
     ) nogil:
         cdef int offset
         cdef void* src_action_ptr
         if is_discrete:
-            ((<INT_t*> actions_ptr) + batch_index)[0] = ptr.get().action_i
+            if is_next:
+                ((<INT_t*> actions_ptr) + batch_index)[0] = ptr.get().next_action_i
+            else:
+                ((<INT_t*> actions_ptr) + batch_index)[0] = ptr.get().action_i
         else:
             offset = batch_index * ptr.get().action_size
-            src_action_ptr = ptr.get().action_f
+            if is_next:
+                src_action_ptr = ptr.get().next_action_f
+            else:
+                src_action_ptr = ptr.get().action_f
             memcpy(
                 (<FLOAT_t*> actions_ptr) + offset,
                 <FLOAT_t*> src_action_ptr,
@@ -1291,6 +1382,8 @@ cdef class TransitionMiniBatch:
         void* actions_ptr,
         float* rewards_ptr,
         void* next_observations_ptr,
+        void* next_actions_ptr,
+        float* next_rewards_ptr,
         float* terminals_ptr,
         float* n_steps_ptr,
         int n_frames,
@@ -1317,17 +1410,17 @@ cdef class TransitionMiniBatch:
             ptr=ptr,
             actions_ptr=actions_ptr,
             is_discrete=is_discrete,
+            is_next=False
         )
+        rewards_ptr[batch_index] = ptr.get().reward
 
         # compute N-step return
         next_ptr = ptr
         for i in range(n_steps):
-            n_step_return += next_ptr.get().reward * gamma ** i
+            n_step_return += next_ptr.get().next_reward * gamma ** i
             if next_ptr.get().next_transition == nullptr or i == n_steps - 1:
                 break
             next_ptr = next_ptr.get().next_transition
-
-        rewards_ptr[batch_index] = n_step_return
 
         # assign data at t+N
         self._assign_observation(
@@ -1338,8 +1431,39 @@ cdef class TransitionMiniBatch:
             is_image=is_image,
             is_next=True
         )
+        self._assign_action(
+            batch_index=batch_index,
+            ptr=next_ptr,
+            actions_ptr=next_actions_ptr,
+            is_discrete=is_discrete,
+            is_next=True
+        )
+        next_rewards_ptr[batch_index] = n_step_return
         terminals_ptr[batch_index] = next_ptr.get().terminal
         n_steps_ptr[batch_index] = i + 1
+
+    def add_additional_data(self, key, value):
+        """Add arbitrary additional data.
+
+        Args:
+            key (str): key of data.
+            value (any): value.
+
+        """
+        self._additional_data[key] = value
+
+    def get_additional_data(self, key):
+        """Returns specified additional data.
+
+        Args:
+            key (str): key of data.
+
+        Returns:
+            any: value.
+
+        """
+        assert key in self._additional_data, '%s does not exist.' % key
+        return self._additional_data[key]
 
     @property
     def observations(self):
@@ -1382,6 +1506,26 @@ cdef class TransitionMiniBatch:
         return self._next_observations
 
     @property
+    def next_actions(self):
+        """ Returns mini-batch of actions at `t+n`.
+
+        Returns:
+            numpy.ndarray: actions at `t+n`.
+
+        """
+        return self._next_actions
+
+    @property
+    def next_rewards(self):
+        """ Returns mini-batch of rewards at `t+n`.
+
+        Returns:
+            numpy.ndarray: rewards at `t+n`.
+
+        """
+        return self._next_rewards
+
+    @property
     def terminals(self):
         """ Returns mini-batch of terminal flags at `t+n`.
 
@@ -1390,6 +1534,18 @@ cdef class TransitionMiniBatch:
 
         """
         return self._terminals
+
+    @property
+    def masks(self):
+        """ Returns mini-batch of binary masks for bootstrapping.
+
+        If any of transitions have an invalid mask, this will return ``None``.
+
+        Returns:
+            numpy.ndarray: binary mask.
+
+        """
+        return self._masks
 
     @property
     def n_steps(self):
@@ -1431,3 +1587,96 @@ cdef class TransitionMiniBatch:
 
     def __iter__(self):
         return iter(self._transitions)
+
+
+cdef _compute_returns(Transition transition, float gamma, int n_frames):
+    cdef vector[TransitionPtr] transitions
+    cdef TransitionPtr ptr
+    cdef int i, channel, width, height, offset
+    cdef bool is_image
+    cdef float R
+    cdef void* observations_ptr
+    cdef FLOAT_t* returns_ptr
+    cdef FLOAT_t* terminals_ptr
+    cdef np.ndarray observations, returns, terminals
+
+    # iterate through transitions
+    ptr = transition.get_ptr()
+    with nogil:
+        while True:
+            transitions.push_back(ptr)
+            ptr = ptr.get().next_transition
+            if ptr == nullptr:
+                break
+
+    # prepare observations and returns
+    is_image = len(transition.get_observation_shape()) == 3
+    if is_image and n_frames > 1:
+        channel, width, height = transition.get_observation_shape()
+        shape = (transitions.size(), channel * n_frames, width, height)
+    else:
+        shape = (transitions.size(), *transition.get_observation_shape())
+    dtype = np.uint8 if is_image else np.float32
+    observations = np.zeros(shape, dtype=dtype)
+    returns = np.empty(transitions.size(), dtype=np.float32)
+    terminals = np.empty(transitions.size(), dtype=np.float32)
+
+    observations_ptr = observations.data
+    returns_ptr = <FLOAT_t*> returns.data
+    terminals_ptr = <FLOAT_t*> terminals.data
+    R = 0.0
+    with nogil:
+        for i in range(transitions.size()):
+            ptr = transitions[i]
+
+            # compute discounted return
+            R += (gamma**i) * ptr.get().next_reward
+            returns_ptr[i] = R
+            terminals_ptr[i] = ptr.get().terminal
+
+            # append observation
+            if is_image:
+                channel = ptr.get().observation_shape[0]
+                height = ptr.get().observation_shape[1]
+                width = ptr.get().observation_shape[2]
+                # stack frames if necessary
+                if n_frames > 1:
+                    offset = n_frames * i * channel * height * width
+                    _stack_frames(
+                        transition=ptr,
+                        stack=(<UINT8_t*> observations_ptr) + offset,
+                        n_frames=n_frames,
+                        stack_next=True
+                    )
+                else:
+                    offset = i * channel * height * width
+                    memcpy(
+                        (<UINT8_t*> observations_ptr) + offset,
+                        ptr.get().next_observation_i,
+                        channel * height * width
+                    )
+            else:
+                offset = i * ptr.get().observation_shape[0]
+                memcpy(
+                    (<FLOAT_t*> observations_ptr) + offset,
+                    ptr.get().next_observation_f,
+                    ptr.get().observation_shape[0] * sizeof(FLOAT_t)
+                )
+
+    return observations, returns, terminals
+
+
+def compute_lambda_return(transition, algo, gamma, lam, n_frames):
+    observations, returns, terminals = _compute_returns(
+        transition, gamma, n_frames
+    )
+
+    values = algo.predict_value(observations)
+    gammas = gamma ** (np.arange(returns.shape[0]) + 1)
+    returns += gammas * values * (1.0 - terminals)
+
+    lambdas = lam**np.arange(returns.shape[0])
+    lambda_return = (1.0 - lam) * np.sum(lambdas[:-1] * returns[:-1])
+    lambda_return += lambdas[-1] * returns[-1]
+
+    return lambda_return

@@ -38,6 +38,7 @@ class DDPGBaseImpl(ContinuousQFunctionMixin, TorchImplBase, metaclass=ABCMeta):
     _gamma: float
     _tau: float
     _n_critics: int
+    _target_reduction_type: str
     _use_gpu: Optional[Device]
     _q_func: Optional[EnsembleContinuousQFunction]
     _policy: Optional[Policy]
@@ -60,6 +61,7 @@ class DDPGBaseImpl(ContinuousQFunctionMixin, TorchImplBase, metaclass=ABCMeta):
         gamma: float,
         tau: float,
         n_critics: int,
+        target_reduction_type: str,
         use_gpu: Optional[Device],
         scaler: Optional[Scaler],
         action_scaler: Optional[ActionScaler],
@@ -82,6 +84,7 @@ class DDPGBaseImpl(ContinuousQFunctionMixin, TorchImplBase, metaclass=ABCMeta):
         self._gamma = gamma
         self._tau = tau
         self._n_critics = n_critics
+        self._target_reduction_type = target_reduction_type
         self._use_gpu = use_gpu
 
         # initialized in build
@@ -143,8 +146,43 @@ class DDPGBaseImpl(ContinuousQFunctionMixin, TorchImplBase, metaclass=ABCMeta):
         self._critic_optim.zero_grad()
 
         q_tpn = self.compute_target(batch)
+
         loss = self.compute_critic_loss(batch, q_tpn)
 
+        loss.backward()
+        self._critic_optim.step()
+
+        return loss.cpu().detach().numpy()
+
+    @train_api
+    @torch_api()
+    def update_critic_unlearn(self, batch: TorchMiniBatch, **kwargs) -> np.ndarray:
+        assert self._critic_optim is not None
+
+        algo = kwargs['algo']
+
+        self._critic_optim.zero_grad()
+
+        # ob = torch.from_numpy(batch.observations).cuda()
+        # ac = torch.from_numpy(batch.actions).cuda()
+        # target_values = algo._impl._q_func(ob, ac)
+        # pred_values = self._q_func(ob, ac)
+        #batch.next_observations = torch.from_numpy(batch.next_observations).cuda()
+
+        q_tpn_1 = algo._impl.compute_target(batch)
+        q_tpn_2 = self.compute_target(batch)
+        #print(q_tpn)
+
+        #ob = torch.from_numpy(batch.next_observations).cuda()
+        #action = algo._impl._targ_policy(ob)
+        #q_tpn = algo._impl._targ_q_func.compute_target(
+        #        ob,
+        #        action.clamp(-1.0, 1.0),
+        #        reduction=self._target_reduction_type,
+        #    )
+
+        loss = 0.1 * self.compute_critic_loss(batch, q_tpn_1.detach()) + self.compute_critic_loss(batch, q_tpn_2)
+        
         loss.backward()
         self._critic_optim.step()
 
@@ -155,12 +193,14 @@ class DDPGBaseImpl(ContinuousQFunctionMixin, TorchImplBase, metaclass=ABCMeta):
     ) -> torch.Tensor:
         assert self._q_func is not None
         return self._q_func.compute_error(
-            observations=batch.observations,
-            actions=batch.actions,
-            rewards=batch.rewards,
-            target=q_tpn,
-            terminals=batch.terminals,
-            gamma=self._gamma**batch.n_steps,
+            obs_t=batch.observations,
+            act_t=batch.actions,
+            rew_tp1=batch.next_rewards,
+            q_tp1=q_tpn,
+            ter_tp1=batch.terminals,
+            gamma=self._gamma ** batch.n_steps,
+            use_independent_target=self._target_reduction_type == "none",
+            masks=batch.masks,
         )
 
     @train_api
@@ -173,8 +213,27 @@ class DDPGBaseImpl(ContinuousQFunctionMixin, TorchImplBase, metaclass=ABCMeta):
         self._q_func.eval()
 
         self._actor_optim.zero_grad()
-        # print('hello! ----------------------------')
+
         loss = self.compute_actor_loss(batch)
+
+        loss.backward()
+        self._actor_optim.step()
+
+        return loss.cpu().detach().numpy()
+    
+    @train_api
+    @torch_api()
+    def update_actor_unlearn(self, batch: TorchMiniBatch, alpha) -> np.ndarray:
+        assert self._q_func is not None
+        assert self._actor_optim is not None
+
+        # Q function should be inference mode for stability
+        self._q_func.eval()
+
+        self._actor_optim.zero_grad()
+
+        # loss = -self.compute_actor_loss(batch) * alpha
+        loss = self.compute_actor_loss(batch) * alpha
 
         loss.backward()
         self._actor_optim.step()
@@ -255,7 +314,7 @@ class DDPGImpl(DDPGBaseImpl):
             return self._targ_q_func.compute_target(
                 batch.next_observations,
                 action.clamp(-1.0, 1.0),
-                reduction="min",
+                reduction=self._target_reduction_type,
             )
 
     def _sample_action(self, x: torch.Tensor) -> torch.Tensor:

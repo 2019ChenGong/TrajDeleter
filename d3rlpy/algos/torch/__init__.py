@@ -1,4 +1,5 @@
 from .awac_impl import AWACImpl
+from .awr_impl import AWRImpl, DiscreteAWRImpl
 from .bc_impl import BCImpl, DiscreteBCImpl
 from .bcq_impl import BCQImpl, DiscreteBCQImpl
 from .bear_impl import BEARImpl

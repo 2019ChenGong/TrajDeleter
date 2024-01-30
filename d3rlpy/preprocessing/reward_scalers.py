@@ -253,7 +253,7 @@ class MinMaxRewardScaler(RewardScaler):
         if self._minimum is not None and self._maximum is not None:
             return
 
-        rewards = [transition.reward for transition in transitions]
+        rewards = [transition.next_reward for transition in transitions]
 
         self._minimum = float(np.min(rewards))
         self._maximum = float(np.max(rewards))
@@ -348,7 +348,7 @@ class StandardRewardScaler(RewardScaler):
         if self._mean is not None and self._std is not None:
             return
 
-        rewards = [transition.reward for transition in transitions]
+        rewards = [transition.next_reward for transition in transitions]
 
         self._mean = float(np.mean(rewards))
         self._std = float(np.std(rewards))
@@ -458,7 +458,7 @@ class ReturnBasedRewardScaler(RewardScaler):
             ret = 0.0
             curr_transition = start_transition
             while True:
-                ret += curr_transition.reward
+                ret += curr_transition.next_reward
                 if curr_transition.next_transition is None:
                     break
                 curr_transition = curr_transition.next_transition
@@ -504,7 +504,7 @@ def register_reward_scaler(cls: Type[RewardScaler]) -> None:
 
 def create_reward_scaler(name: str, **kwargs: Any) -> RewardScaler:
     assert name in REWARD_SCALER_LIST, f"{name} seems not to be registered."
-    reward_scaler = REWARD_SCALER_LIST[name](**kwargs)
+    reward_scaler = REWARD_SCALER_LIST[name](**kwargs)  # type: ignore
     assert isinstance(reward_scaler, RewardScaler)
     return reward_scaler
 

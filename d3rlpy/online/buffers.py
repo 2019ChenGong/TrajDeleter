@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, cast
 
 import gym
 import numpy as np
@@ -12,6 +12,7 @@ from ..dataset import (
     TransitionMiniBatch,
     trace_back_and_clear,
 )
+from ..envs import BatchEnv
 from .utility import get_action_size_from_env
 
 
@@ -20,12 +21,16 @@ class _Buffer(metaclass=ABCMeta):
     _transitions: FIFOQueue[Transition]
     _observation_shape: Sequence[int]
     _action_size: int
+    _create_mask: bool
+    _mask_size: int
 
     def __init__(
         self,
         maxlen: int,
         env: Optional[gym.Env] = None,
         episodes: Optional[List[Episode]] = None,
+        create_mask: bool = False,
+        mask_size: int = 1,
     ):
         def drop_callback(transition: Transition) -> None:
             # remove links when dropping the last transition
@@ -46,6 +51,8 @@ class _Buffer(metaclass=ABCMeta):
 
         self._observation_shape = observation_shape
         self._action_size = action_size
+        self._create_mask = create_mask
+        self._mask_size = mask_size
 
         # add initial transitions
         if episodes:
@@ -63,6 +70,9 @@ class _Buffer(metaclass=ABCMeta):
         assert episode.get_action_size() == self._action_size
         for transition in episode.transitions:
             self._transitions.append(transition)
+            # add mask if necessary
+            if self._create_mask and transition.mask is None:
+                transition.mask = np.random.randint(2, size=self._mask_size)
 
     @abstractmethod
     def sample(
@@ -144,12 +154,17 @@ class _Buffer(metaclass=ABCMeta):
             episode_transitions.reverse()
 
             # stack data
-            for i, episode_transition in enumerate(episode_transitions):
+            for episode_transition in episode_transitions:
                 observations.append(episode_transition.observation)
                 actions.append(episode_transition.action)
                 rewards.append(episode_transition.reward)
-                terminals.append(episode_transition.terminal)
-                episode_terminals.append(i == len(episode_transitions) - 1)
+                terminals.append(0.0)
+                episode_terminals.append(0.0)
+            observations.append(episode_transitions[-1].next_observation)
+            actions.append(episode_transitions[-1].next_action)
+            rewards.append(episode_transitions[-1].next_reward)
+            terminals.append(episode_transitions[-1].terminal)
+            episode_terminals.append(1.0)
 
         if len(self._observation_shape) == 3:
             observations = np.asarray(observations, dtype=np.uint8)
@@ -162,6 +177,8 @@ class _Buffer(metaclass=ABCMeta):
             rewards=rewards,
             terminals=terminals,
             episode_terminals=episode_terminals,
+            create_mask=self._create_mask,
+            mask_size=self._mask_size,
         )
 
     def __len__(self) -> int:
@@ -204,6 +221,32 @@ class Buffer(_Buffer):
         """
 
 
+class BatchBuffer(_Buffer):
+    @abstractmethod
+    def append(
+        self,
+        observations: np.ndarray,
+        actions: np.ndarray,
+        rewards: np.ndarray,
+        terminals: np.ndarray,
+        clip_episodes: Optional[np.ndarray] = None,
+    ) -> None:
+        """Append observation, action, reward and terminal flag to buffer.
+
+        If the terminal flag is True, Monte-Carlo returns will be computed with
+        an entire episode and the whole transitions will be appended.
+
+        Args:
+            observations: observation.
+            actions: action.
+            rewards: reward.
+            terminals: terminal flag.
+            clip_episodes: flag to clip the current episode. If ``None``, the
+                episode is clipped based on ``terminal``.
+
+        """
+
+
 class BasicSampleMixin:
 
     _transitions: FIFOQueue[Transition]
@@ -229,13 +272,14 @@ class ReplayBuffer(BasicSampleMixin, Buffer):
         env (gym.Env): gym-like environment to extract shape information.
         episodes (list(d3rlpy.dataset.Episode)): list of episodes to
             initialize buffer.
+        create_mask (bool): flag to create bootstrapping mask.
+        mask_size (int): ensemble size for binary mask.
 
     """
 
     _prev_observation: Optional[np.ndarray]
     _prev_action: Optional[np.ndarray]
     _prev_reward: float
-    _prev_terminal: float
     _prev_transition: Optional[Transition]
 
     def __init__(
@@ -243,12 +287,13 @@ class ReplayBuffer(BasicSampleMixin, Buffer):
         maxlen: int,
         env: Optional[gym.Env] = None,
         episodes: Optional[List[Episode]] = None,
+        create_mask: bool = False,
+        mask_size: int = 1,
     ):
-        super().__init__(maxlen, env, episodes)
+        super().__init__(maxlen, env, episodes, create_mask, mask_size)
         self._prev_observation = None
         self._prev_action = None
         self._prev_reward = 0.0
-        self._prev_terminal = 0.0
         self._prev_transition = None
 
     def append(
@@ -278,6 +323,12 @@ class ReplayBuffer(BasicSampleMixin, Buffer):
             if isinstance(terminal, bool):
                 terminal = 1.0 if terminal else 0.0
 
+            # create binary mask
+            if self._create_mask:
+                mask = np.random.randint(2, size=self._mask_size)
+            else:
+                mask = None
+
             transition = Transition(
                 observation_shape=self._observation_shape,
                 action_size=self._action_size,
@@ -285,7 +336,10 @@ class ReplayBuffer(BasicSampleMixin, Buffer):
                 action=self._prev_action,
                 reward=self._prev_reward,
                 next_observation=observation,
+                next_action=action,
+                next_reward=reward,
                 terminal=terminal,
+                mask=mask,
                 prev_transition=self._prev_transition,
             )
 
@@ -298,35 +352,123 @@ class ReplayBuffer(BasicSampleMixin, Buffer):
         self._prev_observation = observation
         self._prev_action = action
         self._prev_reward = reward
-        self._prev_terminal = terminal
 
         if clip_episode:
-            # skip the timeout state
-            if terminal:
-                # add the terminal state
-                self._add_last_step()
             self.clip_episode()
 
     def clip_episode(self) -> None:
         self._prev_observation = None
         self._prev_action = None
         self._prev_reward = 0.0
-        self._prev_terminal = 0.0
         self._prev_transition = None
 
-    def _add_last_step(self) -> None:
-        assert self._prev_terminal
-        assert self._prev_observation is not None
-        transition = Transition(
-            observation_shape=self._observation_shape,
-            action_size=self._action_size,
-            observation=self._prev_observation,
-            action=self._prev_action,
-            reward=self._prev_reward,
-            next_observation=np.zeros_like(self._prev_observation),
-            terminal=1.0,
-            prev_transition=self._prev_transition,
-        )
-        if self._prev_transition:
-            self._prev_transition.next_transition = transition
-        self._transitions.append(transition)
+
+class BatchReplayBuffer(BasicSampleMixin, BatchBuffer):
+    """Standard Replay Buffer for batch training.
+
+    Args:
+        maxlen (int): the maximum number of data length.
+        n_envs (int): the number of environments.
+        env (gym.Env): gym-like environment to extract shape information.
+        episodes (list(d3rlpy.dataset.Episode)): list of episodes to
+            initialize buffer
+        create_mask (bool): flag to create bootstrapping mask.
+        mask_size (int): ensemble size for binary mask.
+
+    """
+
+    _n_envs: int
+    _prev_observations: List[Optional[np.ndarray]]
+    _prev_actions: List[Optional[np.ndarray]]
+    _prev_rewards: List[Optional[np.ndarray]]
+    _prev_transitions: List[Optional[Transition]]
+
+    def __init__(
+        self,
+        maxlen: int,
+        env: BatchEnv,
+        episodes: Optional[List[Episode]] = None,
+        create_mask: bool = False,
+        mask_size: int = 1,
+    ):
+        super().__init__(maxlen, env, episodes, create_mask, mask_size)
+        self._n_envs = len(env)
+        self._prev_observations = [None for _ in range(len(env))]
+        self._prev_actions = [None for _ in range(len(env))]
+        self._prev_rewards = [None for _ in range(len(env))]
+        self._prev_transitions = [None for _ in range(len(env))]
+
+    def append(
+        self,
+        observations: np.ndarray,
+        actions: np.ndarray,
+        rewards: np.ndarray,
+        terminals: np.ndarray,
+        clip_episodes: Optional[np.ndarray] = None,
+    ) -> None:
+        # if None, use terminal
+        if clip_episodes is None:
+            clip_episodes = terminals
+
+        # validation
+        assert observations.shape == (self._n_envs, *self._observation_shape)
+        if actions.ndim == 2:
+            assert actions.shape == (self._n_envs, self._action_size)
+        else:
+            assert actions.shape == (self._n_envs,)
+        assert rewards.shape == (self._n_envs,)
+        assert terminals.shape == (self._n_envs,)
+        # not allow terminal=True and clip_episode=False
+        assert np.all(terminals - clip_episodes < 1)
+
+        # create Transition objects
+        for i in range(self._n_envs):
+            if self._prev_observations[i] is not None:
+
+                prev_observation = self._prev_observations[i]
+                prev_action = self._prev_actions[i]
+                prev_reward = cast(np.ndarray, self._prev_rewards[i])
+                prev_transition = self._prev_transitions[i]
+
+                # create binary mask
+                if self._create_mask:
+                    mask = np.random.randint(2, size=self._mask_size)
+                else:
+                    mask = None
+
+                transition = Transition(
+                    observation_shape=self._observation_shape,
+                    action_size=self._action_size,
+                    observation=prev_observation,
+                    action=prev_action,
+                    reward=float(prev_reward),
+                    next_observation=observations[i],
+                    next_action=actions[i],
+                    next_reward=float(rewards[i]),
+                    terminal=float(terminals[i]),
+                    mask=mask,
+                    prev_transition=prev_transition,
+                )
+
+                if prev_transition:
+                    prev_transition.next_transition = transition
+
+                self._transitions.append(transition)
+                self._prev_transitions[i] = transition
+
+            self._prev_observations[i] = observations[i]
+            self._prev_actions[i] = actions[i]
+            self._prev_rewards[i] = rewards[i]
+
+            if clip_episodes[i]:
+                self._prev_observations[i] = None
+                self._prev_actions[i] = None
+                self._prev_rewards[i] = None
+                self._prev_transitions[i] = None
+
+    def clip_episode(self) -> None:
+        for i in range(self._n_envs):
+            self._prev_observations[i] = None
+            self._prev_actions[i] = None
+            self._prev_rewards[i] = None
+            self._prev_transitions[i] = None

@@ -22,6 +22,8 @@ from ..models.q_functions import QFunctionFactory
 from .base import AlgoBase
 from .torch.bcq_impl import BCQImpl, DiscreteBCQImpl
 
+import torch
+
 
 class BCQ(AlgoBase):
     r"""Batch-Constrained Q-learning algorithm.
@@ -278,6 +280,66 @@ class BCQ(AlgoBase):
 
         return metrics
 
+    def _update_stage1_remain(self, batch: TransitionMiniBatch) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        imitator_loss = self._impl.update_imitator(batch)
+        metrics.update({"imitator_loss": imitator_loss})
+
+        if self._grad_step >= self._rl_start_step:
+            critic_loss = self._impl.update_critic(batch)
+            metrics.update({"critic_loss": critic_loss})
+
+            if self._grad_step % self._update_actor_interval == 0:
+                actor_loss = self._impl.update_actor(batch)
+                metrics.update({"actor_loss": actor_loss})
+                self._impl.update_actor_target()
+                self._impl.update_critic_target()
+
+        return metrics
+
+    def _update_stage1_unlearn(self, batch: TransitionMiniBatch, alpha) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        imitator_loss = self._impl.update_imitator(batch)
+        metrics.update({"imitator_loss": imitator_loss})
+
+        if self._grad_step >= self._rl_start_step:
+            critic_loss = self._impl.update_critic(batch)
+            metrics.update({"critic_loss": critic_loss})
+
+            if self._grad_step % self._update_actor_interval == 0:
+                actor_loss = self._impl.update_actor_unlearn(batch, alpha)
+                metrics.update({"actor_loss": actor_loss})
+                self._impl.update_actor_target()
+                self._impl.update_critic_target()
+
+        return metrics
+
+    def _update_stage2(self, batch: TransitionMiniBatch, original_algo: AlgoBase) -> Dict[str, float]:
+        assert self._impl is not None, IMPL_NOT_INITIALIZED_ERROR
+
+        metrics = {}
+
+        imitator_loss = self._impl.update_imitator(batch)
+        metrics.update({"imitator_loss": imitator_loss})
+
+        if self._grad_step >= self._rl_start_step:
+            critic_loss = self._impl.update_critic_unlearn(batch, algo=original_algo)
+            metrics.update({"critic_loss": critic_loss})
+
+            if self._grad_step % self._update_actor_interval == 0:
+                actor_loss = self._impl.update_actor(batch)
+                metrics.update({"actor_loss": actor_loss})
+                self._impl.update_actor_target()
+                self._impl.update_critic_target()
+
+        return metrics
+
     def sample_action(self, x: Union[np.ndarray, List[Any]]) -> np.ndarray:
         """BCQ does not support sampling action."""
         raise NotImplementedError("BCQ does not support sampling action.")
@@ -338,6 +400,9 @@ class DiscreteBCQ(AlgoBase):
         n_steps (int): N-step TD calculation.
         gamma (float): discount factor.
         n_critics (int): the number of Q functions for ensemble.
+        target_reduction_type (str): ensemble reduction method at target value
+            estimation. The available options are
+            ``['min', 'max', 'mean', 'mix', 'none']``.
         action_flexibility (float): probability threshold represented as
             :math:`\tau`.
         beta (float): reguralization term for imitation function.
@@ -359,6 +424,7 @@ class DiscreteBCQ(AlgoBase):
     _encoder_factory: EncoderFactory
     _q_func_factory: QFunctionFactory
     _n_critics: int
+    _target_reduction_type: str
     _action_flexibility: float
     _beta: float
     _target_update_interval: int
@@ -377,6 +443,7 @@ class DiscreteBCQ(AlgoBase):
         n_steps: int = 1,
         gamma: float = 0.99,
         n_critics: int = 1,
+        target_reduction_type: str = "min",
         action_flexibility: float = 0.3,
         beta: float = 0.5,
         target_update_interval: int = 8000,
@@ -401,6 +468,7 @@ class DiscreteBCQ(AlgoBase):
         self._encoder_factory = check_encoder(encoder_factory)
         self._q_func_factory = check_q_func(q_func_factory)
         self._n_critics = n_critics
+        self._target_reduction_type = target_reduction_type
         self._action_flexibility = action_flexibility
         self._beta = beta
         self._target_update_interval = target_update_interval
@@ -419,6 +487,7 @@ class DiscreteBCQ(AlgoBase):
             q_func_factory=self._q_func_factory,
             gamma=self._gamma,
             n_critics=self._n_critics,
+            target_reduction_type=self._target_reduction_type,
             action_flexibility=self._action_flexibility,
             beta=self._beta,
             use_gpu=self._use_gpu,

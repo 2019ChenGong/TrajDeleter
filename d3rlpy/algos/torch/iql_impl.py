@@ -66,6 +66,7 @@ class IQLImpl(DDPGBaseImpl):
             gamma=gamma,
             tau=tau,
             n_critics=n_critics,
+            target_reduction_type="min",
             use_gpu=use_gpu,
             scaler=scaler,
             action_scaler=action_scaler,
@@ -109,12 +110,13 @@ class IQLImpl(DDPGBaseImpl):
     ) -> torch.Tensor:
         assert self._q_func is not None
         return self._q_func.compute_error(
-            observations=batch.observations,
-            actions=batch.actions,
-            rewards=batch.rewards,
-            target=q_tpn,
-            terminals=batch.terminals,
-            gamma=self._gamma**batch.n_steps,
+            obs_t=batch.observations,
+            act_t=batch.actions,
+            rew_tp1=batch.next_rewards,
+            q_tp1=q_tpn,
+            ter_tp1=batch.terminals,
+            gamma=self._gamma ** batch.n_steps,
+            use_independent_target=False,
         )
 
     def compute_target(self, batch: TorchMiniBatch) -> torch.Tensor:
@@ -166,4 +168,4 @@ class IQLImpl(DDPGBaseImpl):
         v_t = self._value_func(batch.observations)
         diff = q_t - v_t
         weight = (self._expectile - (diff < 0.0).float()).abs().detach()
-        return (weight * (diff**2)).mean()
+        return (weight * (diff ** 2)).mean()

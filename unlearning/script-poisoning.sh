@@ -28,7 +28,7 @@ for dataset_key in "${!datasets[@]}"; do
         algo=${algos[$algo_key]}
         model_path="./params/${algo}_${dataset}_em_params.json"
         for seed in 0 1 2; do
-            # 为每个任务分配GPU
+
             gpu_id=${GPUs[$((seed % ${#GPUs[@]}))]}
             command="CUDA_VISIBLE_DEVICES=$gpu_id python ./poisoning_training.py --seed=$seed --dataset='$dataset_key' --model='$model_path' --algo='$algo_key' &"
             echo $command

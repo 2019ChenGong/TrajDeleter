@@ -12,8 +12,7 @@ unlearning_rates = [0.11, 0.15]
 unlearning_steps = [10000, 100000]
 seeds = [0, 1, 2]
 
-# 可用GPU列表
-gpus = ['0', '1', '2']  # 根据您的GPU数量和编号修改
+gpus = ['0', '1', '2'] 
 algos = ['BCQ', 'CQL', 'BEAR', 'IQL', 'PLASP', 'TD3PlusBC']
 
 # os.environ['LD_LIBRARY_PATH'] = '/anaconda3/envs/d4rl/lib'

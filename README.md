@@ -66,7 +66,7 @@ pip install scikit-learn==1.0.2
 pip install Cython==0.29.36
 ```
 
-### 32. Install dm-control and mjrl:
+### 2. Install dm-control and mjrl:
   ```bash
   pip install dm_control==0.0.425341097
   git clone https://github.com/aravindr93/mjrl.git
@@ -121,13 +121,15 @@ pip install Cython==0.29.36
 
 ⚠️ The scripts for replicating our experiments can be found under the folds: `unlearning`. 
 
-# MuJoCo Tasks
+### MuJoCo Tasks
 
-## Training clean agents:
+#### Training original agents:
+
+The hyper-parameters settings of offline RL algorithms are recorded in fold './params'.
 
 - Please run 
 ```
-python mujoco_cql.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id>
+python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id>
 ```
 In the above scripts, `<dataset_name>` specifies the dataset name. The options are as follows:
 | tasks | dataset name |
@@ -136,9 +138,9 @@ In the above scripts, `<dataset_name>` specifies the dataset name. The options a
 | Half-Cheetah      |  halfcheetah-medium-v0           |
 | Walker2D      |  walker2d-medium-v0           |
  
-After training, the trained models are saved into the folder `../<dataset_name>`.
+After training, the trained models are saved into the folder `./Fully_trained/<dataset_name>`. You could download the well-trained original agents from our provided link.
 
-## Training poisoned agents:
+## For RQ1, Trajauditor:
 
 The hyper-parameters settings of offline RL algorithms are recorded in fold './params'.
 

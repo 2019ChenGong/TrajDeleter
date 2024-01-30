@@ -203,11 +203,8 @@ Besides, you could run `bash script-mujoco-test.py`
 
 To test the successful unlearning rates of the unlearned agents:
 ```
-python performance_test.py --task <dataset_name> --seed <seed> --gpu <gpu_id> -model <path-of-the-hyperparameters-of-models> \
-                               -model <path-of-the-weights-of-models>
+python script-trajauditor.py
 ```
-
-Besides, you could run `bash script-mujoco-test.py`
 
 ## Acknowledgement
 

@@ -59,12 +59,13 @@ The version of Mujoco is [Mujoco 2.1.0](https://github.com/deepmind/mujoco/relea
 
 The installation of mujoco can be found [here](https://github.com/deepmind/mujoco):
 ```
-pip install -e . (install d3rlpy)
+pip install d3rlpy==1.0.0
 pip install mujoco-py==2.1.2.14
 pip install gym==0.22.0
 pip install scikit-learn==1.0.2
 pip install Cython==0.29.36
 ```
+Then replace the 'd3rlpy' folder in the your path of environment with the given 'd3rlpy' folder.
 
 ### 2. Install dm-control and mjrl:
   ```bash

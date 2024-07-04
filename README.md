@@ -26,7 +26,7 @@ The descriptions of folds are as follows:
 
 The structure of this project in `unlearning' folder is as follows：
 ```
-MuJoCo
+Unlearning
     -- efficacy_evaluation.py ------------------ the codes of trajauditor for RQ1.
     -- mujoco_exact_unlearning.py ------------------ unlearning with retraining the agents from scratch.
     -- mujoco_finetuning.py ------------------ unlearning with fine-tuning method.

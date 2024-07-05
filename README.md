@@ -3,6 +3,8 @@
 ## Models
 Please check our agents' parameters in this anonymous link:
 - [Agent](https://drive.google.com/drive/folders/1MeGkaGAZa_NXJUuk7GhfzyS_bsUHm8Z3?usp=sharing)
+
+Please download the model from this link, and please move these folders to the ``unlearning" folder.
  
 The descriptions of folds are as follows:
 

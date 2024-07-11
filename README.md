@@ -163,7 +163,7 @@ Please run,
 python script-auditor.py \
 ```
 
-After auditing, the results are saved into the folder `./<output_csv>`. 
+After auditing, the results are saved in the `./<output_csv>` folder. If you want to change the file where the results are stored, please update the `output_csv` name in our code.
 
 #### Unlearning Specific Trajectories:
 

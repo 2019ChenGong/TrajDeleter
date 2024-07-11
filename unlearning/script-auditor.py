@@ -60,7 +60,6 @@ import csv
 
 #                 gpu_index = (gpu_index + 1) % len(gpus)
 
-#     # 等待所有命令完成
 #     concurrent.futures.wait(futures)
 
 envs = ["hopper-medium-expert-v0", "halfcheetah-medium-expert-v0", "walker2d-medium-expert-v0"]

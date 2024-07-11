@@ -16,7 +16,7 @@ from sklearn.model_selection import train_test_split
 def main(args):
     dataset, env = d3rlpy.datasets.get_d4rl(args.dataset)
     d3rlpy.seed(args.seed)
-
+    
     if args.algo == "CQL":
         algorithm = d3rlpy.algos.CQL.from_json(args.model, use_gpu=True)
         algorithm.load_model(args.model_params)
@@ -47,15 +47,15 @@ def main(args):
         algorithm.load_model(args.model_params)
         ori_algorithm = d3rlpy.algos.PLASWithPerturbation.from_json(args.model, use_gpu=True)
         ori_algorithm.load_model(args.model_params)
-    else:
+    else: 
         print("No availble algorithms!")
-
-
+        
+    
     # modify the reward
     train_episodes, test_episodes = train_test_split(dataset, test_size=args.unlearning_rate, shuffle=False)
     unlearning_episodes, test_episodes_ = train_test_split(test_episodes, train_size= (args.unlearning_rate - 0.1) * 1.0 / args.unlearning_rate, shuffle=False)
 
-    stage1_step = 4000
+    stage1_step = 8000
 
 
     for instance in unlearning_episodes:
@@ -68,10 +68,10 @@ def main(args):
     remain_step = int(stage1_step / (1 + unlearn_step_per_epoch / unlearn_freq))
     unlearn_step = int(remain_step / unlearn_freq * unlearn_step_per_epoch)
     print(remain_step, unlearn_step)
-    alpha = 0.5
+    lamda = 0.5
 
-    log_stage1 = f"Mujoco_our_method_{stage1_step}_{alpha}/stage1/" + str(args.dataset) + '-' + str(args.number_of_unlearning) + '-' + str(args.unlearning_rate-0.1)
-    log_stage2 = f"Mujoco_our_method_{stage1_step}_{alpha}/stage2/" + str(args.dataset) + '-' + str(args.number_of_unlearning) + '-' + str(args.unlearning_rate-0.1)
+    log_stage1 = f"Mujoco_our_method_{stage1_step}_{lamda}/stage1/" + str(args.dataset) + '-' + str(args.number_of_unlearning) + '-' + str(args.unlearning_rate-0.1)
+    log_stage2 = f"Mujoco_our_method_{stage1_step}_{lamda}/stage2/" + str(args.dataset) + '-' + str(args.number_of_unlearning) + '-' + str(args.unlearning_rate-0.1)
 
 
     algorithm.unlearningfit_stage1(
@@ -80,7 +80,7 @@ def main(args):
             remain_step_per_epoch=remain_step_per_epoch,
             unlearn_step_per_epoch=unlearn_step_per_epoch,
             unlearn_freq=unlearn_freq,
-            alpha=alpha,
+            lamda=lamda,
             eval_episodes=test_episodes_,
             remain_steps=remain_step,
             unlearn_steps=unlearn_step,
@@ -91,7 +91,7 @@ def main(args):
                 'discounted_advantage': discounted_sum_of_advantage_scorer,
                 'value_scale': average_value_estimation_scorer
             })
-
+    
     stage2_step = 10000 - stage1_step
     stage2_n_steps_per_epoch = 1000
     algorithm.unlearningfit_stage2(
@@ -107,7 +107,7 @@ def main(args):
             'discounted_advantage': discounted_sum_of_advantage_scorer,
             'value_scale': average_value_estimation_scorer
         })
-
+    
     # stage2_step = 2000
     # stage2_n_steps_per_epoch = 1000
     # algorithm.fit(
@@ -122,8 +122,8 @@ def main(args):
     #         'discounted_advantage': discounted_sum_of_advantage_scorer,
     #         'value_scale': average_value_estimation_scorer
     #     })
-
-
+    
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -139,3 +139,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
+'''
+export LD_LIBRARY_PATH=/u/fzv6en/anaconda3/envs/d4rl/lib
+export LD_LIBRARY_PATH=/u/fzv6en/anaconda3/envs/d4rl/lib:/u/fzv6en/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
+'''

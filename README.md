@@ -222,6 +222,7 @@ To test the successful unlearning rates of the unlearned agents:
 ```
 python script-trajauditor.py
 ```
+Please change variable line 41-43 to evaluate the efficacy of unlearning methods.
 
 ## Acknowledgement
 

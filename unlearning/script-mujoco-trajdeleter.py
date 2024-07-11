@@ -12,7 +12,7 @@ unlearning_rates = [0.11]
 unlearning_steps = [10000]
 seeds = [0, 1, 2]
 
-gpus = ['0', '1', '2']  # 根据您的GPU数量和编号修改
+gpus = ['0', '1', '2'] 
 algos = ['BCQ', 'CQL', 'BEAR', 'IQL', 'PLASP', 'TD3PlusBC']
 # algos = ['CQL']
 

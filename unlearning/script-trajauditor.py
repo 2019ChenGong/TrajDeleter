@@ -6,12 +6,12 @@ import csv
 
 envs = ["halfcheetah-medium-expert-v0", "walker2d-medium-expert-v0", "hopper-medium-expert-v0"]
 # envs = ["walker2d-medium-expert-v0"]
-algos = ["CQL", "BCQ", "TD3PlusBC", "IQL", "PLASP", "BEAR"]
-# algos = ["CQL"]
+# algos = ["CQL", "BCQ", "TD3PLUSBC", "IQL", "PLASP", "BEAR"]
+algos = ["TD3PlusBC"]
 unlearning_rates = [0.01]
 gpus = ['0', '1', '2']
 
-output_csv = "result_trajaditor_4000_0.5.csv" 
+output_csv = "result_trajaditor_8000_1.0.csv" 
 
 max_workers = 24
 
@@ -38,13 +38,17 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
     futures = []
     gpu_index = 0
 
+    stage1_step = 8000
+    stage2_step = 10000 - stage1_step
+    lamda = 1.0
+
     for env in envs:
         for unlearning_rate in unlearning_rates:
-            file_folder = f"./Mujoco_our_method_4000_0.5/stage2/{env}-10000-{unlearning_rate}/"
+            file_folder = f"./Mujoco_our_method_{stage1_step}_{lamda}/stage2/{env}-10000-{unlearning_rate}/"
             folders = get_directories(file_folder)
             for folder in folders:
                 model_param = os.path.join(folder, 'params.json')
-                search_pattern = os.path.join(folder, '*_6000.pt')
+                search_pattern = os.path.join(folder, f'*_{stage2_step}.pt')
                 model_files = glob.glob(search_pattern)
                 if not model_files:
                     continue

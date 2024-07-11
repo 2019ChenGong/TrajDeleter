@@ -146,7 +146,9 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your_path_of_mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --model <params>
 ```
+
 In the above scripts, `<dataset_name>` specifies the dataset name. The options are as follows:
+
 | tasks | dataset name |
 | ------ | ----------- |
 | Hopper      |  hopper-medium-expert-v0           |
@@ -177,7 +179,7 @@ python mujoco_trajdeleter.py --dataset <dataset_name> --seed <seed> --gpu <gpu_i
                              --model_params <path-of-the-weights-of-orignial-agent>  --number_of_unlearning <the-number-of-unlearning-rate> \
 ```
 
-After unlearning, the unlearned agents are saved in the `./Mujoco_our_method/<dataset_name>` folder. Additionally, you can edit line 58 to change the `stage1_step` variable, which controls the number of steps for unlearning.
+After unlearning, the unlearned agents are saved in the `./Mujoco_our_method_<stage1_step>_<balancing factor>/<dataset_name>` folder. Additionally, you can edit line 58 to change the `stage1_step` variable, which controls the number of steps for unlearning.
 
 Besides, you could run ` python script-mujoco-trajdeleter.py` for all algorithms and tasks.
 

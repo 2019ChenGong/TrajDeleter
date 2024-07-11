@@ -45,6 +45,7 @@ Unlearning
     -- script-mujoco-random-reward.py ------------------ script files of random reward method.
     -- script-mujoco-test.py ------------------ script files of agents' performance testing.
     -- script-mujoco-trajdeleter.py ------------------ script files of our proposed unlearning method.
+    -- script-trajauditor.py ------------------ script files of trajauditor.
     -- script-poisoning-fine-tuning.py ------------------ script files of fine-tuning the poisoned dataset.
     -- script-poisoning-retrain.py ------------------ script files of retraining the poisoned dataset.
     -- script-poisoning.py ------------------ script files of poisoning agents.

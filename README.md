@@ -29,6 +29,7 @@ The descriptions of folds are as follows:
 The structure of this project in `unlearning' folder is as follows：
 ```
 Unlearning
+    -- env_test.py ------------------ download and test the dataset
     -- efficacy_evaluation.py ------------------ the codes of trajauditor for RQ1.
     -- mujoco_exact_unlearning.py ------------------ unlearning with retraining the agents from scratch.
     -- mujoco_finetuning.py ------------------ unlearning with fine-tuning method.
@@ -125,6 +126,13 @@ Then replace the 'd3rlpy' folder in the your path of environment with the given 
 ⚠️ The scripts for replicating our experiments can be found under the folds: `unlearning`. 
 
 ### MuJoCo Tasks
+
+#### Download and test the offline dataset:
+
+Please run:
+```
+python env_test.py
+```
 
 #### Training original agents:
 

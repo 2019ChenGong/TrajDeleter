@@ -12,13 +12,13 @@ unlearning_rates = [0.11]
 unlearning_steps = [10000]
 seeds = [0, 1, 2]
 
-gpus = ['0', '1', '2']  
+gpus = ['0', '1', '2']  # 根据您的GPU数量和编号修改
 algos = ['BCQ', 'CQL', 'BEAR', 'IQL', 'PLASP', 'TD3PlusBC']
 # algos = ['CQL']
 
 
-# os.environ['LD_LIBRARY_PATH'] = '/anaconda3/envs/d4rl/lib'
-# os.environ['LD_LIBRARY_PATH'] += ':/.mujoco/mujoco210/bin'
+# os.environ['LD_LIBRARY_PATH'] = '/bigtemp/fzv6en/anaconda3/envs/d4rl/lib'
+# os.environ['LD_LIBRARY_PATH'] += ':/u/fzv6en/.mujoco/mujoco210/bin'
 # os.environ['LD_LIBRARY_PATH'] += ':/usr/lib/nvidia'
 
 max_workers = 24
@@ -55,7 +55,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                             '--seed', seed,
                             '--unlearning_rate', unlearning_rate,
                             '--algo', algo,
-                            '--gpu', gpus[gpu_index]
+                            '--gpu', gpus[gpu_index] 
                         ]
                         script_path = 'mujoco_trajdeleter.py'
                         command = ['python', script_path] + [str(arg) for arg in arguments]

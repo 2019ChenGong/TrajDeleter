@@ -179,7 +179,7 @@ python mujoco_trajdeleter.py --dataset <dataset_name> --seed <seed> --gpu <gpu_i
                              --model_params <path-of-the-weights-of-orignial-agent>  --number_of_unlearning <the-number-of-unlearning-rate> \
 ```
 
-After unlearning, the unlearned agents are saved in the `./Mujoco_our_method_<stage1_step>_<balancing factor>/<dataset_name>` folder. Additionally, you can edit line 58 to change the `stage1_step` variable, which controls the number of steps for unlearning.
+After unlearning, the unlearned agents are saved in the `./Mujoco_our_method_<stage1_step>_<balancing factor>/<dataset_name>` folder. Additionally, you can edit line 58 and line 71 to change the `stage1_step` and `lamda` variable, which controls the number of steps for unlearning and the balancing factor.
 
 Besides, you could run ` python script-mujoco-trajdeleter.py` for all algorithms and tasks.
 

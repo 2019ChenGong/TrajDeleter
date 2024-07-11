@@ -68,7 +68,7 @@ def main(args):
     remain_step = int(stage1_step / (1 + unlearn_step_per_epoch / unlearn_freq))
     unlearn_step = int(remain_step / unlearn_freq * unlearn_step_per_epoch)
     print(remain_step, unlearn_step)
-    lamda = 0.5
+    lamda = 1.0
 
     log_stage1 = f"Mujoco_our_method_{stage1_step}_{lamda}/stage1/" + str(args.dataset) + '-' + str(args.number_of_unlearning) + '-' + str(args.unlearning_rate-0.1)
     log_stage2 = f"Mujoco_our_method_{stage1_step}_{lamda}/stage2/" + str(args.dataset) + '-' + str(args.number_of_unlearning) + '-' + str(args.unlearning_rate-0.1)

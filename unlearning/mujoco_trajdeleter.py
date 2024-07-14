@@ -80,7 +80,7 @@ def main(args):
             remain_step_per_epoch=remain_step_per_epoch,
             unlearn_step_per_epoch=unlearn_step_per_epoch,
             unlearn_freq=unlearn_freq,
-            lamda=lamda,
+            alpha=lamda,
             eval_episodes=test_episodes_,
             remain_steps=remain_step,
             unlearn_steps=unlearn_step,

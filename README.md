@@ -49,6 +49,7 @@ Unlearning
     -- script-poisoning-fine-tuning.py ------------------ script files of fine-tuning the poisoned dataset.
     -- script-poisoning-retrain.py ------------------ script files of retraining the poisoned dataset.
     -- script-poisoning.py ------------------ script files of poisoning agents.
+    packages.txt ------------------ the list of our env.
     params ------------------ the files of hype-parameters settings of offline reinforcement learning algorithms.
     
 ```

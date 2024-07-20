@@ -69,6 +69,16 @@ pip install gym==0.22.0
 pip install scikit-learn==1.0.2
 pip install Cython==0.29.36
 ```
+
+After installing mujoco-py, you may encounter an error when running 'import mujoco_py': "Compiling /projects/p32304/.conda/envs/review/lib/python3.7/site-packages/mujoco_py/cymj.pyx because it changed."
+
+To resolve this error, please execute the following command:
+
+```
+sudo apt-get install libglew-dev
+```
+Alternatively, you can find additional solutions at this GitHub issue page: [https://github.com/openai/mujoco-py/issues/627].
+
 Then replace the 'd3rlpy' folder in the your path of environment with the given 'd3rlpy' folder.
 
 ### 2. Install dm-control and mjrl:

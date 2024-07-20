@@ -59,6 +59,8 @@ This code was developed with python 3.7.11.
 
 The version of Mujoco is [Mujoco 2.1.0](https://github.com/deepmind/mujoco/releases/tag/2.1.0).
 
+Our CUDA version is 12.4.
+
 ### 1. Install d3rlpy and mujoco-py:
 
 The installation of mujoco can be found [here](https://github.com/deepmind/mujoco):

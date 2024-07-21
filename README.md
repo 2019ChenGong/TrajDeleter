@@ -82,7 +82,7 @@ sudo apt-get install libglew-dev
 ```
 Alternatively, you can find additional solutions at this GitHub issue page: [https://github.com/openai/mujoco-py/issues/627].
 
-Then replace the 'd3rlpy' folder in the your path of environment with the given 'd3rlpy' folder, witch can be downloaded here https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link.
+Then replace the 'd3rlpy' folder in the your path of environment with the given 'd3rlpy' folder, witch can be downloaded here [D3RLPY](https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link).
 
 ### 2. Install dm-control and mjrl:
   ```bash

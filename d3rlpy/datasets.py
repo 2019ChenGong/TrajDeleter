@@ -140,7 +140,7 @@ def get_pybullet(
 
     """
     try:
-        import d4rl.gym_mujoco  # type: ignore
+        import d4rl_pybullet  # type: ignore
 
         env = gym.make(env_name)
         dataset = MDPDataset(

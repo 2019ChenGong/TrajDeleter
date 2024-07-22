@@ -71,16 +71,21 @@ pip install gym==0.22.0
 pip install scikit-learn==1.0.2
 pip install Cython==0.29.36
 ```
-The installation of mujoco can be found [here](https://github.com/deepmind/mujoco).
 
-- Please 
+### 2. Install mujoco:
 
-- Please move the 'lib' folder to the '.mujoco/' folder.
+```
+mkdir ~/.mujoco
+```
+
+Download 'mujoco210-linux-x86_64.tar.gz' from [Mujoco 2.1.0](https://github.com/deepmind/mujoco/releases/tag/2.1.0), and unzip it to '~/.mujoco'.
+
+Please move the 'lib' folder to the '.mujoco/' folder.
 
 Then replace the 'd3rlpy' folder in the your path of environment with the given 'd3rlpy' folder, witch can be downloaded here [D3RLPY](https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link).
 
 
-### 2. Install dm-control and mjrl:
+### 3. Install dm-control and mjrl:
   ```bash
   pip install dm_control==0.0.425341097
   git clone https://github.com/aravindr93/mjrl.git
@@ -88,7 +93,7 @@ Then replace the 'd3rlpy' folder in the your path of environment with the given 
   pip install -e .
   ```
   
-### 3. Install d4rl:
+### 4. Install d4rl:
   ```bash
   pip install patchelf
   git clone https://github.com/rail-berkeley/d4rl.git

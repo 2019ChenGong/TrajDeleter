@@ -78,7 +78,7 @@ pip install Cython==0.29.36
 mkdir ~/.mujoco
 ```
 
-Download 'mujoco210-linux-x86_64.tar.gz' from [Mujoco 2.1.0](https://github.com/deepmind/mujoco/releases/tag/2.1.0), and unzip it to '~/.mujoco'.
+Download 'mujoco210-linux-x86_64.tar.gz' from [Mujoco 2.1.0](https://github.com/deepmind/mujoco/releases/tag/2.1.0), and unzip it to '~/.mujoco'. Then, you can find the folder '~/.mujoco/mujoco210'.
 
 Please move the 'lib' folder to the '.mujoco/' folder.
 

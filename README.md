@@ -165,6 +165,8 @@ sudo apt-get install libglew-dev
 ```
 Alternatively, you can find additional solutions at this GitHub issue page: [https://github.com/openai/mujoco-py/issues/627].
 
+**Potential error2:**
+
 In the above scripts, `<dataset_name>` specifies the dataset name. The options are as follows:
 
 | tasks | dataset name |
@@ -174,9 +176,6 @@ In the above scripts, `<dataset_name>` specifies the dataset name. The options a
 | Walker2D      |  walker2d-medium-v0           |
  
 After training, the trained models are saved into the folder `./Fully_trained/<dataset_name>`. You could download the well-trained original agents from our provided link.
-
-**Potential error2:**
-
 
 
 #### For RQ1, Trajauditor:

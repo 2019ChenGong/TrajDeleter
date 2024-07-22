@@ -64,7 +64,6 @@ Our CUDA version is 12.4.
 
 ### 1. Install d3rlpy and mujoco-py:
 
-The installation of mujoco can be found [here](https://github.com/deepmind/mujoco):
 ```
 pip install d3rlpy==1.0.0
 pip install mujoco-py==2.1.2.14
@@ -72,6 +71,9 @@ pip install gym==0.22.0
 pip install scikit-learn==1.0.2
 pip install Cython==0.29.36
 ```
+The installation of mujoco can be found [here](https://github.com/deepmind/mujoco).
+
+- Please 
 
 - Please move the 'lib' folder to the '.mujoco/' folder.
 

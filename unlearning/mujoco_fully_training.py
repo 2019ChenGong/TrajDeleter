@@ -61,9 +61,9 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument('--dataset', type=str, default='halfcheetah-expert-v0')
-    parser.add_argument('--dataset', type=str, default='walker2d-medium-v0')
-    parser.add_argument('--model', type=str, default='./cql_half_e_params.json')
-    parser.add_argument('--algo', type=str, default='BC')
+    parser.add_argument('--dataset', type=str, default='walker2d-medium-expert-v0')
+    parser.add_argument('--model', type=str, default='./params/cql_walk_em_params.json')
+    parser.add_argument('--algo', type=str, default='CQL')
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--gpu', type=int, default=0)
     args = parser.parse_args()

@@ -73,16 +73,10 @@ pip install scikit-learn==1.0.2
 pip install Cython==0.29.36
 ```
 
-After installing mujoco-py, you may encounter an error when running 'import mujoco_py': "Compiling /projects/p32304/.conda/envs/review/lib/python3.7/site-packages/mujoco_py/cymj.pyx because it changed."
-
-To resolve this error, please execute the following command:
-
-```
-sudo apt-get install libglew-dev
-```
-Alternatively, you can find additional solutions at this GitHub issue page: [https://github.com/openai/mujoco-py/issues/627].
+- Please move the 'lib' folder to the '.mujoco/' folder.
 
 Then replace the 'd3rlpy' folder in the your path of environment with the given 'd3rlpy' folder, witch can be downloaded here [D3RLPY](https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link).
+
 
 ### 2. Install dm-control and mjrl:
   ```bash
@@ -159,6 +153,14 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your_path_of_mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --model <params> --algo <algo>
 ```
+After installing mujoco-py, you may encounter an error when running 'import mujoco_py': "Compiling /projects/p32304/.conda/envs/review/lib/python3.7/site-packages/mujoco_py/cymj.pyx because it changed."
+
+To resolve this error, please execute the following command:
+
+```
+sudo apt-get install libglew-dev
+```
+Alternatively, you can find additional solutions at this GitHub issue page: [https://github.com/openai/mujoco-py/issues/627].
 
 In the above scripts, `<dataset_name>` specifies the dataset name. The options are as follows:
 

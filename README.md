@@ -157,7 +157,7 @@ The hyper-parameters settings of offline RL algorithms are recorded in fold './p
 export LD_LIBRARY_PATH=/your_path_of_env/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your_path_of_mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --model <params>
+python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --model <params> --algo <algo>
 ```
 
 In the above scripts, `<dataset_name>` specifies the dataset name. The options are as follows:

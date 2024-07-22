@@ -78,11 +78,11 @@ pip install Cython==0.29.36
 mkdir ~/.mujoco
 ```
 
-Download 'mujoco210-linux-x86_64.tar.gz' from [Mujoco 2.1.0](https://github.com/deepmind/mujoco/releases/tag/2.1.0), and unzip it to '~/.mujoco'. Then, you can find the folder '~/.mujoco/mujoco210'.
+Download `mujoco210-linux-x86_64.tar.gz` from [Mujoco 2.1.0](https://github.com/deepmind/mujoco/releases/tag/2.1.0), and unzip it to `~/.mujoco`. Then, you can find the folder `~/.mujoco/mujoco210`.
 
-Please move the 'lib' folder to the '.mujoco/' folder.
+Please move the `lib` folder to the `~/.mujoco/` folder.
 
-Then replace the 'd3rlpy' folder in the your path of environment with the given 'd3rlpy' folder, witch can be downloaded here [D3RLPY](https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link).
+Then replace the `d3rlpy` folder in the your path of environment with the given `d3rlpy` folder, witch can be downloaded here [D3RLPY](https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link).
 
 
 ### 3. Install dm-control and mjrl:

@@ -153,6 +153,9 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your_path_of_mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --model <params> --algo <algo>
 ```
+
+**Potential error1:**
+
 After installing mujoco-py, you may encounter an error when running 'import mujoco_py': "Compiling /projects/p32304/.conda/envs/review/lib/python3.7/site-packages/mujoco_py/cymj.pyx because it changed."
 
 To resolve this error, please execute the following command:
@@ -171,6 +174,10 @@ In the above scripts, `<dataset_name>` specifies the dataset name. The options a
 | Walker2D      |  walker2d-medium-v0           |
  
 After training, the trained models are saved into the folder `./Fully_trained/<dataset_name>`. You could download the well-trained original agents from our provided link.
+
+**Potential error2:**
+
+
 
 #### For RQ1, Trajauditor:
 

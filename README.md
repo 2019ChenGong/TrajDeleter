@@ -167,6 +167,17 @@ Alternatively, you can find additional solutions at this GitHub issue page: [htt
 
 **Potential error2:**
 
+If you get the error:
+
+```
+gym.error.NameNotFound: Environment `halfcheetah-medium-expert` doesn't exist. Did you mean: `bullet-halfcheetah-medium-expert`?
+```
+please input the codes:
+
+```
+import d4rl.gym_mujoco 
+```
+
 In the above scripts, `<dataset_name>` specifies the dataset name. The options are as follows:
 
 | tasks | dataset name |

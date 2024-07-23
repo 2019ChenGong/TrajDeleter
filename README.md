@@ -163,7 +163,7 @@ python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gp
 
 **Potential error1:**
 
-After installing mujoco-py, you may encounter an error when running 'import mujoco_py': "Compiling /projects/p32304/.conda/envs/review/lib/python3.7/site-packages/mujoco_py/cymj.pyx because it changed."
+After installing mujoco-py, you may encounter an error about 'GLEW' when running 'import mujoco_py': "Compiling /projects/p32304/.conda/envs/review/lib/python3.7/site-packages/mujoco_py/cymj.pyx because it changed."
 
 To resolve this error, please execute the following command:
 

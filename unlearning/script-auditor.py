@@ -6,7 +6,7 @@ import csv
 
 envs = ["hopper-medium-expert-v0", "halfcheetah-medium-expert-v0", "walker2d-medium-expert-v0"]
 algos = ["TD3PlusBC"]
-# algos = ["CQL", "BCQ", "TD3PLUSBC", "IQL", "PLASP", "BEAR"]
+# algos = ["CQL", "BCQ", "TD3PlusBC", "IQL", "PLASP", "BEAR"]
 unlearning_rates = [0.1, 0.15, 0.2]
 gpus = ['0', '1', '2']
 

@@ -169,8 +169,8 @@ The hyper-parameters settings of offline RL algorithms are recorded in fold './p
 
 - Please run 
 ```
-export LD_LIBRARY_PATH=/your_path_of_env/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your_path_of_mujoco210/bin
+export LD_LIBRARY_PATH=/p/usrresearch/anaconda3/envs/d4rl/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/u/usr/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 python mujoco_fully_training.py --dataset <dataset_name> --seed <seed> --gpu <gpu_id> --model <params> --algo <algo>
 ```

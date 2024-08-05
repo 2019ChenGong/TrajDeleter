@@ -5,6 +5,7 @@ from d3rlpy.metrics.scorer import td_error_scorer
 from d3rlpy.metrics.scorer import discounted_sum_of_advantage_scorer
 from d3rlpy.metrics.scorer import average_value_estimation_scorer
 from sklearn.model_selection import train_test_split
+import d4rl.gym_mujoco
 
 import argparse
 from sklearn.model_selection import train_test_split

@@ -135,7 +135,21 @@ Then replace the `d3rlpy` folder in the your path of environment with the given 
   ```
   pip install -e .
   ```
-    
+
+## Install with Docker
+
+You can also pull our image from Docker Hub:
+
+```
+docker pull liuzzyg/trajdeleter:latest
+```
+
+Then enter the image:
+
+```
+docker run --gpus all -it liuzzyg/trajdeleter:latest /bin/bash
+```
+
 ## How to run
 
 ⚠️ The scripts for replicating our experiments can be found under the folds: `unlearning`. 

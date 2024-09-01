@@ -1,7 +1,0 @@
-#!/bin/bash -eux
-
-# type check
-mypy d3rlpy
-
-# code-format check
-pylint d3rlpy

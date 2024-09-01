@@ -139,8 +139,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-'''
-export LD_LIBRARY_PATH=/u/fzv6en/anaconda3/envs/d4rl/lib
-export LD_LIBRARY_PATH=/u/fzv6en/anaconda3/envs/d4rl/lib:/u/fzv6en/.mujoco/mujoco210/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-'''

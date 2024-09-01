@@ -221,7 +221,7 @@ python script-auditor.py \
 
 After auditing, the results are saved in the `./<output_csv>` folder. If you want to change the file where the results are stored, please update the `output_csv` name in our code.
 
-#### Unlearning Specific Trajectories:
+#### For RQ2, unlearning Specific Trajectories:
 
 1. The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
 

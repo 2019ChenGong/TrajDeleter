@@ -33,22 +33,24 @@ Unlearning
     -- efficacy_evaluation.py ------------------ the codes of trajauditor for RQ1.
     -- mujoco_exact_unlearning.py ------------------ unlearning with retraining the agents from scratch.
     -- mujoco_finetuning.py ------------------ unlearning with fine-tuning method.
+    -- mujoco_fully_training.py ------------------ train the original agents using the whole dataset.
     -- mujoco_random_reward.py ------------------ unlearning with random_reward method.
     -- mujoco_auditor.py ------------------ the codes of trajauditor for RQ2.
     -- mujoco_trajdeleter.py ------------------ unlearning using our proposed method.
     -- performance_test.py ------------------ evaluate the average cumulative rewards obtained by agents.
     -- poisoning_retrain.py ------------------ unlearning the poisoned trajectories using retraining method.
     -- poisoning_training.py ------------------ training agents using the poisoned dataset.
-    -- script-aditor.py ------------------ script files of trajauditor.
+    -- script-aditor.py ------------------ script files of trajauditor and achieve the results in RQ1.
     -- script-exact-unlearning.py ------------------ script files of retraining.
     -- script-mujoco-fine-tune.py ------------------ script files of fine tuning.
     -- script-mujoco-random-reward.py ------------------ script files of random reward method.
     -- script-mujoco-test.py ------------------ script files of agents' performance testing.
     -- script-mujoco-trajdeleter.py ------------------ script files of our proposed unlearning method.
-    -- script-trajauditor.py ------------------ script files of trajauditor.
+    -- script-performance-test.py ------------------ script files of testing the cumulative returns of agents.
     -- script-poisoning-fine-tuning.py ------------------ script files of fine-tuning the poisoned dataset.
     -- script-poisoning-retrain.py ------------------ script files of retraining the poisoned dataset.
     -- script-poisoning.py ------------------ script files of poisoning agents.
+    -- script-trajauditor.py ------------------ script files of trajauditor.
     packages.txt ------------------ the list of our env.
     params ------------------ the files of hype-parameters settings of offline reinforcement learning algorithms.
     
@@ -221,7 +223,7 @@ python script-auditor.py \
 
 After auditing, the results are saved in the `./<output_csv>` folder. If you want to change the file where the results are stored, please update the `output_csv` name in our code.
 
-#### Unlearning Specific Trajectories:
+#### For RQ2, unlearning Specific Trajectories:
 
 1. The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
 

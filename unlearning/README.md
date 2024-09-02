@@ -133,7 +133,7 @@ To poison the agents:
 bash script-poisoning.sh
 ```
 
-Besides, you can also run ` python poisoning_training.py` for specific algorithms and tasks.
+Besides, you can run ` python poisoning_training.py` for specific algorithms and tasks.
 
 To retrain the agents on the clean dataset:
 
@@ -141,6 +141,6 @@ To retrain the agents on the clean dataset:
 bash script-poisoning-retain.sh
 ```
 
-Besides, you can also run ` python poisoning_retrain.py` for specific algorithms and tasks.
+Besides, you can run ` python poisoning_retrain.py` for specific algorithms and tasks.
 
 

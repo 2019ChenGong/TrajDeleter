@@ -65,7 +65,7 @@ python script-auditor.py \
 
 After auditing, the results are saved in the `./<output_csv>` folder. If you want to change the file where the results are stored, please update the `output_csv` name in our code.
 
-#### For RQ2, unlearning Specific Trajectories:
+#### For RQ2, unlearning specific trajectories:
 
 1. The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
 
@@ -120,3 +120,27 @@ To test the successful unlearning rates of the unlearned agents:
 python script-trajauditor.py
 ```
 Please change variable line 41-43 to evaluate the efficacy of unlearning methods.
+
+#### For RQ3, hyper-parameters analysis:
+
+You can edit line 58 and line 71 to change the `stage1_step` and `lamda` variable, which controls the number of steps for unlearning and the balancing factor.
+
+#### For defending against trajectory poisoning,
+
+To poison the agents:
+
+```
+bash script-poisoning.sh
+```
+
+Besides, you can also run ` python poisoning_training.py` for specific algorithms and tasks.
+
+To retrain the agents on the clean dataset:
+
+```
+bash script-poisoning-retain.sh
+```
+
+Besides, you can also run ` python poisoning_retrain.py` for specific algorithms and tasks.
+
+

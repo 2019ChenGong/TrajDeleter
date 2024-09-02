@@ -7,7 +7,7 @@ Please run:
 python env_test.py
 ```
 
-#### Training original agents:
+#### (1) Training original agents:
 
 The hyper-parameters settings of offline RL algorithms are recorded in fold './params'.
 
@@ -54,7 +54,7 @@ In the above scripts, `<dataset_name>` specifies the dataset name. The options a
 After training, the trained models are saved into the folder `./Fully_trained/<dataset_name>`. You could download the well-trained original agents from our provided link.
 
 
-#### For RQ1, Trajauditor:
+#### (2) For RQ1, Trajauditor:
 
 The hyper-parameters settings of offline RL algorithms are recorded in fold './params'.
 
@@ -65,7 +65,7 @@ python script-auditor.py \
 
 After auditing, the results are saved in the `./<output_csv>` folder. If you want to change the file where the results are stored, please update the `output_csv` name in our code.
 
-#### For RQ2, unlearning specific trajectories:
+#### (3) For RQ2, unlearning specific trajectories:
 
 1. The agents used for the unlearning experiments in the `./Fully_trained/<dataset_name>` folder. The weights of the agents are named as model.pt, and the hyper-parameters settings of the offline RL algorithm are named as <xx>.json.
 
@@ -105,7 +105,7 @@ python script-mujoco-random-reward.py
 
 After unlearning, the unlearned agents are saved into the folder `./Mujoco_noise_reward/<dataset_name>``.
 
-#### Evaluation:
+5. Evaluation:
 
 To test the obtained cumulative rewards of the agents:
 ```
@@ -121,11 +121,11 @@ python script-trajauditor.py
 ```
 Please change variable line 41-43 to evaluate the efficacy of unlearning methods.
 
-#### For RQ3, hyper-parameters analysis:
+#### (4) For RQ3, hyper-parameters analysis:
 
 You can edit line 58 and line 71 to change the `stage1_step` and `lamda` variable, which controls the number of steps for unlearning and the balancing factor.
 
-#### For defending against trajectory poisoning,
+#### (5) For defending against trajectory poisoning,
 
 To poison the agents:
 

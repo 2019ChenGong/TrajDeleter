@@ -141,6 +141,6 @@ To retrain the agents on the clean dataset:
 bash script-poisoning-retain.sh
 ```
 
-Besides, you can run ` python poisoning_retrain.py` for specific algorithms and tasks.
+You can also run ` python poisoning_retrain.py` for specific algorithms and tasks.
 
 

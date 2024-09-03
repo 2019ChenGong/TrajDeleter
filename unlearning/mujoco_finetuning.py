@@ -46,7 +46,7 @@ def main(args):
     train_episodes, test_episodes = train_test_split(dataset, test_size=args.unlearning_rate, shuffle=False)
     unlearning_episodes, test_episodes_ = train_test_split(test_episodes, train_size= (args.unlearning_rate - 0.1) * 1.0 / args.unlearning_rate, shuffle=False)
     
-    #     #fine-tuning
+    #  fine-tuning
     
     log = "./Mujoco_fine_tuning/" + str(args.dataset) + '-' + str(args.number_of_finetuning)  + '-' + str(args.unlearning_rate-0.1) + '/'
     

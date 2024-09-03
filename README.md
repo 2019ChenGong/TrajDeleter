@@ -84,7 +84,7 @@ Download `mujoco210-linux-x86_64.tar.gz` from [Mujoco 2.1.0](https://github.com/
 
 Please move the `lib` folder in our repository to the `~/.mujoco/` folder.
 
-Then replace the `d3rlpy` folder in the your path of environment with the given `d3rlpy` folder, which can be downloaded here [D3RLPY](https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link). For example, the path can be `/anaconda3/envs/<the-name-of-environment>/lib/python3.7/site-packages/`.
+Then replace the `d3rlpy` folder in the your path of environment with the given `d3rlpy` folder, which can be downloaded here [D3RLPY](https://drive.google.com/drive/folders/1blEviHDCupHlHMPfDInytxwm9ZkTO8er?usp=drive_link) or extract it from the `d3rlpy.zip` file. For example, the path can be `/anaconda3/envs/<the-name-of-environment>/lib/python3.7/site-packages/`.
 
 
 ### 3. Install dm-control and mjrl:

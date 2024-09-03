@@ -80,12 +80,7 @@ def computer_value_distribute(
     total_sums = []
     for episode in episodes:
         for batch in _make_batches(episode, WINDOW_SIZE, algo.n_frames):
-            # estimate values for dataset actions
-            # dataset_values = algo.predict_value(
-            #     batch.observations, batch.actions
-            # )
-            # dataset_values = cast(np.ndarray, dataset_values)
-
+            
             # estimate values for the current policy
             actions = algo.predict(batch.observations)
             on_policy_values = algo_critic.predict_value(batch.observations, actions)
@@ -116,16 +111,9 @@ def computer_noisy_value_distribute(
         for batch in _make_batches(episode, WINDOW_SIZE, algo.n_frames):        
                 
             noise = (np.random.normal(loc=0.0, scale=1.0, size=batch.observations.shape) - 0.5) * 0.08
-                                
-        # estimate values for dataset actions
-            # dataset_values = algo.predict_value(
-            #     batch.observations, batch.actions
-            # )
-            # dataset_values = cast(np.ndarray, dataset_values)
 
             # estimate values for the current policy
             actions = algo.predict(batch.observations)
-            # print(actions)
             on_policy_values = algo_critic.predict_value(batch.observations + noise, actions)
 
             # calculate advantages
@@ -295,18 +283,6 @@ def main(args):
         
         if outliers_fully == False:
             unlearning_account_fully += 1
-
-        # if dis_target_exact > max(dis_shadow):
-        #     Flag = False
-        # else:
-        #     Flag = True
-
-        # if Flag == False:
-        #     unlearning_account += 1
-        
-        # print(f"fully:{dis_shadow}")
-        # print(f"exact:{dis_target_exact}")
-        # print(f"Flag:{Flag}")
             
   
 

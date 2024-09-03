@@ -47,7 +47,6 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--dataset', type=str, default='halfcheetah-expert-v0')
     parser.add_argument('--dataset', type=str, default='maze2d-umaze-v1')
     parser.add_argument('--model', type=str, default='./cql_half_e_params.json')
     parser.add_argument('--unlearning_rate', type=float, default=0.10)

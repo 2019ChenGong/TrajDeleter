@@ -1,5 +1,9 @@
 # TrajDeleter: Enabling Trajectory Forgetting in Offline Reinforcement Learning Agents
 
+## Intro
+
+Replication Package for "[TrajDeleter: Enabling Trajectory Forgetting in Offline Reinforcement Learning Agents]([https://arxiv.org/abs/2210.04688](https://arxiv.org/abs/2404.12530))", NDSS 2025.
+
 ## Models
 Please check our agents' parameters in this anonymous link:
 - [Agent](https://drive.google.com/drive/folders/1MeGkaGAZa_NXJUuk7GhfzyS_bsUHm8Z3?usp=sharing)
